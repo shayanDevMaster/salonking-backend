@@ -47,30 +47,30 @@ def getYourSalon():
 
     try:
         # Convert index to string for Firebase path
-        index_str = str(index)
+        # index_str = str(index)
 
         # Fetch the salon at the specified index
-        ref = db.reference("salons/" + index_str)
+        ref = db.reference("salons/0")
         result = ref.get()
 
         # Check if the salon matches the salon_name
         if result and result.get("salon_name") == salon_name:
             return jsonify({"status": "success", "data": result})
 
-        # If not found at the given index, search through all salons
-        all_salons = db.reference("salons").get() or {}
-        ind = 0
-        # Handle case where all_salons is a dictionary (Firebase key-value structure)
-        for key, salon in all_salons.items():
-            if salon.get("salon_name") == salon_name:
-                return jsonify({"status": "success", "salon": salon, "index": ind})
-            ind += 1
+        # # If not found at the given index, search through all salons
+        # all_salons = db.reference("salons").get() or {}
+        # ind = 0
+        # # Handle case where all_salons is a dictionary (Firebase key-value structure)
+        # for key, salon in all_salons.items():
+        #     if salon.get("salon_name") == salon_name:
+        #         return jsonify({"status": "success", "salon": salon, "index": ind})
+        #     ind += 1
 
-        # If no match is found
-        return jsonify({"status": "not_found", "index": -1})
+        # # If no match is found
+        # return jsonify({"status": "not_found", "index": -1})
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500221
 
 
 # ///////////////////////////////////////////
