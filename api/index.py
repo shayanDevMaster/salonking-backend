@@ -17,45 +17,59 @@ initialize_app(cred, {
     'databaseURL': 'https://salon-booking-7a936-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 
-# Helper function to set data
-def set_data(path, value):
+@app.route("/get", methods=["POST"])
+def get():
+    data = request.get_json()
+    path = data.get("path")
+    if not path:
+        return jsonify({"error": "Missing path"}), 400
+    try:
+        ref = db.reference(path)
+        result = ref.get()
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/set", methods=["POST"])
+def set_data():
+    data = request.get_json()
+    path = data.get("path")
+    value = data.get("value")
+    if not path or value is None:
+        return jsonify({"error": "Missing path or value"}), 400
     try:
         ref = db.reference(path)
         ref.set(value)
-        return {"success": True, "message": "Data saved successfully"}
+        return jsonify({"status": "success"})
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return jsonify({"error": str(e)}), 500
 
-# Helper function to get data
-def get_data(path):
+@app.route("/update", methods=["POST"])
+def update_data():
+    data = request.get_json()
+    path = data.get("path")
+    value = data.get("value")
+    if not path or not isinstance(value, dict):
+        return jsonify({"error": "Missing path or value"}), 400
     try:
         ref = db.reference(path)
-        data = ref.get()
-        if data is None:
-            return {"success": True, "data": None}
-        if isinstance(data, dict) and all(k.isdigit() for k in data.keys()):
-            data = list(data.values())
-        return {"success": True, "data": data}
+        ref.update(value)
+        return jsonify({"status": "success"})
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return jsonify({"error": str(e)}), 500
 
-# API Routes
-@app.route('/api/data/<path:path>', methods=['GET'])
-def read_data(path):
-    result = get_data(path)
-    return jsonify(result), 200 if result["success"] else 500
-
-@app.route('/api/data/<path:path>', methods=['POST'])
-def write_data(path):
+@app.route("/delete", methods=["POST"])
+def delete_data():
     data = request.get_json()
-    if not data:
-        return jsonify({"success": False, "error": "No data provided"}), 400
-    result = set_data(path, data)
-    return jsonify(result), 200 if result["success"] else 500
+    path = data.get("path")
+    if not path:
+        return jsonify({"error": "Missing path"}), 400
+    try:
+        ref = db.reference(path)
+        ref.delete()
+        return jsonify({"status": "deleted"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "healthy"}), 200
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
