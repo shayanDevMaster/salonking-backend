@@ -17,8 +17,19 @@ initialize_app(cred, {
     'databaseURL': 'https://salon-booking-7a936-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 
-@app.route("/get", methods=["POST"])
+# Enable CORS for specific origins (allow local development and your deployed frontend)
+@app.after_request
+def apply_cors(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://127.0.0.1:5501'  # Allow local development
+    # For production, replace with your frontend URL (e.g., 'https://your-frontend.vercel.app')
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
+
+@app.route("/get", methods=["POST", "OPTIONS"])
 def get():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     path = data.get("path")
     if not path:
@@ -30,8 +41,10 @@ def get():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/set", methods=["POST"])
+@app.route("/set", methods=["POST", "OPTIONS"])
 def set_data():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     path = data.get("path")
     value = data.get("value")
@@ -44,8 +57,10 @@ def set_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/update", methods=["POST"])
+@app.route("/update", methods=["POST", "OPTIONS"])
 def update_data():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     path = data.get("path")
     value = data.get("value")
@@ -58,8 +73,10 @@ def update_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/delete", methods=["POST"])
+@app.route("/delete", methods=["POST", "OPTIONS"])
 def delete_data():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     path = data.get("path")
     if not path:
