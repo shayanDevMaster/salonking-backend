@@ -31,6 +31,24 @@ def getAllSalon():
     ref = db.reference("salons")
     result = ref.get()
     return jsonify({"status": "success", "data": result})
+    
+@app.route("/getAllBooking_user", methods=["POST", "OPTIONS"])
+def getAllBooking_User():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    deviceId = data.get("deviceId")
+
+    ref = db.reference("booking")
+    result = ref.get() or {}
+
+    # Filter bookings where status is 'pending' and deviceId matches
+    filtered_bookings = [
+        booking for booking in (result.values() if isinstance(result, dict) else result)
+        if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
+    ]
+
+    return jsonify({"status": "success", "data": filtered_bookings})
 
 # @app.route("/getYourSalon", methods=["POST", "OPTIONS"])
 # def getYourSalon():
