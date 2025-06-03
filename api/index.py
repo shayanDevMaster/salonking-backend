@@ -31,6 +31,28 @@ def getAllSalon():
     ref = db.reference("salons")
     result = ref.get()
     return jsonify({"status": "success", "data": result})
+@app.route("/getYourSalon", methods=["POST", "OPTIONS"])
+def getYourSalon():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    index = data.get("index")
+    salon_name = data.get("salon_id")
+
+    ref = db.reference("salons/"+index)
+    result = ref.get()
+    if result is not None and result.salon_name == salon_name:
+        return jsonify({"status": "success", "data": result})
+    else:
+        all_salons = db.reference("salons").ref.get()
+        ind = 0
+        for salon in all_salons:
+            if(salon.salon_name == salon_name):
+                return jsonify({"status": "success", "salon": salon , "index": ind})
+            ind += 1
+
+    return jsonify({"status": "success" , "index": -1})
+
 
 # ///////////////////////////////////////////
 def Get_data(path):
