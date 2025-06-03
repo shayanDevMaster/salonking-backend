@@ -42,11 +42,11 @@ def getAllBooking_User():
     ref = db.reference("booking")
     result = ref.get() or {}
 
-    # Filter bookings where status is 'pending' and deviceId matches
-    filtered_bookings = [
-        booking for booking in (result.values() if isinstance(result, dict) else result)
-        if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
-    ]
+    # # Filter bookings where status is 'pending' and deviceId matches
+    # filtered_bookings = [
+    #     booking for booking in (result.values() if isinstance(result, dict) else result)
+    #     if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
+    # ]
 
     return jsonify({"status": "success", "data": filtered_bookings})
 
