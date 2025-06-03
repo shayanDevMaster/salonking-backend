@@ -49,7 +49,7 @@ def getYourSalon():
         # Convert index to string for Firebase path
 
         # Fetch the salon at the specified index
-        ref = db.reference("salons/"+str(index))
+        ref = db.reference("salons/0")
         result = ref.get()
 
         # Check if the salon matches the salon_name
