@@ -35,23 +35,42 @@ def getAllSalon():
 def getYourSalon():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
+
+    # Get request data
     data = request.get_json()
     index = data.get("index")
     salon_name = data.get("salon_id")
 
-    ref = db.reference("salons/"+index)
-    result = ref.get()
-    if result is not None and result.salon_name == salon_name:
-        return jsonify({"status": "success", "data": result})
-    else:
-        all_salons = db.reference("salons").ref.get()
+    # Validate input
+    if index is None or not salon_name:
+        return jsonify({"status": "error", "message": "Missing index or salon_id"}), 400
+
+    try:
+        # Convert index to string for Firebase path
+        index_str = str(index)
+
+        # Fetch the salon at the specified index
+        ref = db.reference("salons/" + index_str)
+        result = ref.get()
+
+        # Check if the salon matches the salon_name
+        if result and result.get("salon_name") == salon_name:
+            return jsonify({"status": "success", "data": result})
+
+        # If not found at the given index, search through all salons
+        all_salons = db.reference("salons").get() or {}
         ind = 0
-        for salon in all_salons:
-            if(salon.salon_name == salon_name):
-                return jsonify({"status": "success", "salon": salon , "index": ind})
+        # Handle case where all_salons is a dictionary (Firebase key-value structure)
+        for key, salon in all_salons.items():
+            if salon.get("salon_name") == salon_name:
+                return jsonify({"status": "success", "salon": salon, "index": ind})
             ind += 1
 
-    return jsonify({"status": "success" , "index": -1})
+        # If no match is found
+        return jsonify({"status": "not_found", "index": -1})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 # ///////////////////////////////////////////
