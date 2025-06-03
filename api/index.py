@@ -52,10 +52,10 @@ def getYourSalon():
         # Fetch the salon at the specified index
         ref = db.reference("salons/0")
         result = ref.get()
-        return jsonify({"status": "success", "data": result, "index": index})
 
         # Check if the salon matches the salon_name
-        # if result and result.get("salon_name") == salon_name:
+        if result and result.get("salon_name") != "":
+            return jsonify({"status": "success", "data": result, "index": index})
 
         # # If not found at the given index, search through all salons
         # all_salons = db.reference("salons").get() or {}
