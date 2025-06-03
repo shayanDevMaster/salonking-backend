@@ -34,20 +34,34 @@ def getAllSalon():
     
 @app.route("/getAllBooking_user", methods=["POST", "OPTIONS"])
 def getAllBooking_User():
+    
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # path = data.get("deviceId")
+    # if not path:
+    #     return jsonify({"error": "Missing path"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get()
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    ref = db.reference("booking")
-    result = ref.get() or {}
+    # if request.method == "OPTIONS":
+    #     return jsonify({}), 204  # Respond to preflight with 204 No Content
+    # data = request.get_json()
 
-    # # Filter bookings where status is 'pending' and deviceId matches
-    # filtered_bookings = [
-    #     booking for booking in (result.values() if isinstance(result, dict) else result)
-    #     if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
-    # ]
+    # ref = db.reference("bookings")
+    # result = ref.get() or {}
 
-    return jsonify({"status": "success", "data": result})
+    # # # Filter bookings where status is 'pending' and deviceId matches
+    # # filtered_bookings = [
+    # #     booking for booking in (result.values() if isinstance(result, dict) else result)
+    # #     if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
+    # # ]
+
+    # return jsonify({"status": "success", "data": result})
 
 # @app.route("/getYourSalon", methods=["POST", "OPTIONS"])
 # def getYourSalon():
