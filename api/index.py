@@ -37,7 +37,6 @@ def getAllBooking_User():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
-    deviceId = data.get("deviceId")
 
     ref = db.reference("booking")
     result = ref.get() or {}
@@ -48,7 +47,7 @@ def getAllBooking_User():
     #     if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
     # ]
 
-    return jsonify({"status": "success", "data": filtered_bookings})
+    return jsonify({"status": "success", "data": result})
 
 # @app.route("/getYourSalon", methods=["POST", "OPTIONS"])
 # def getYourSalon():
