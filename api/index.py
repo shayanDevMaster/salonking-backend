@@ -39,9 +39,20 @@ def getUserBookings():
     data = request.get_json()
     deviceId = data.get("deviceId")
 
+    if not deviceId:
+        return jsonify({"error": "Missing deviceId"}), 400
+    
     ref = db.reference("bookings")
-    result = ref.get()
-    return jsonify({"status": "success", "data": result})
+    bookings = ref.get()
+    
+    # Add there bookings filter by device id variable
+    # Filter bookings by deviceId
+    filtered_bookings = {
+        key: value for key, value in bookings.items()
+        if value.get("deviceId") == deviceId
+    } if bookings else {}
+
+    return jsonify({"status": "success", "data": filtered_bookings})
 
 # ///////////////////////////////////////////
 def Get_data(path):
