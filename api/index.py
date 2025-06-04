@@ -45,14 +45,7 @@ def getUserBookings():
     ref = db.reference("bookings")
     bookings = ref.get()
     
-    # Add there bookings filter by device id variable
-    # Filter bookings by deviceId
-    filtered_bookings = {
-        key: value for key, value in bookings.items()
-        if value.get("deviceId") == deviceId
-    } if bookings else {}
-
-    return jsonify({"status": "success", "data": filtered_bookings})
+    return jsonify({"status": "success", "data": bookings})
 
 # ///////////////////////////////////////////
 def Get_data(path):
