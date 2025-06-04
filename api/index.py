@@ -31,78 +31,17 @@ def getAllSalon():
     ref = db.reference("salons")
     result = ref.get()
     return jsonify({"status": "success", "data": result})
-    
-@app.route("/getAllBooking_user", methods=["POST", "OPTIONS"])
-def getAllBooking_User():
-    
+
+@app.route("/getUserBookings", methods=["POST", "OPTIONS"])
+def getUserBookings():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
-    # path = data.get("deviceId")
-    # if not path:
-    #     return jsonify({"error": "Missing path"}), 400
-    try:
-        ref = db.reference("bookings")
-        result = ref.get()
-        return jsonify({"status": "success", "data": result})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    deviceId = data.get("deviceId")
 
-    # if request.method == "OPTIONS":
-    #     return jsonify({}), 204  # Respond to preflight with 204 No Content
-    # data = request.get_json()
-
-    # ref = db.reference("bookings")
-    # result = ref.get() or {}
-
-    # # # Filter bookings where status is 'pending' and deviceId matches
-    # # filtered_bookings = [
-    # #     booking for booking in (result.values() if isinstance(result, dict) else result)
-    # #     if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
-    # # ]
-
-    # return jsonify({"status": "success", "data": result})
-
-# @app.route("/getYourSalon", methods=["POST", "OPTIONS"])
-# def getYourSalon():
-#     if request.method == "OPTIONS":
-#         return jsonify({}), 204  # Respond to preflight with 204 No Content
-
-#     # Get request data
-#     data = request.get_json()
-#     index = data.get("index")
-#     salonName = data.get("salon_id")
-
-#     # Validate input
-#     if index is None or not salonName:
-#         return jsonify({"status": "error", "message": "Missing index or salon_id"}), 400
-
-#     try:
-#         # Convert index to string for Firebase path
-#         index_str = str(index)
-
-#         # Fetch the salon at the specified index
-#         ref = db.reference("salons/"+index_str)
-#         result = ref.get()
-
-#         # Check if the salon matches the salonName
-#         # if result and result.get("salonName") == salonName:
-#         return jsonify({"status": "success", "data": result, "index": index})
-
-#         # # If not found at the given index, search through all salons
-#         # all_salons = db.reference("salons").get() or {}
-#         # ind = 0
-#         # # Handle case where all_salons is a dictionary (Firebase key-value structure)
-#         # for salon in all_salons.items():
-#         #     if salon.get("salonName") == salonName:
-#         #         return jsonify({"status": "success", "salon": salon, "index": ind})
-#         #     ind += 1
-
-#         # If no match is found
-#         return jsonify({"status": "not_found" , "salon": None , "index": -1})
-
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)}), 500
+    ref = db.reference("bookings")
+    result = ref.get()
+    return jsonify({"status": "success", "data": result})
 
 # ///////////////////////////////////////////
 def Get_data(path):
@@ -111,19 +50,16 @@ def Get_data(path):
     try:
         ref = db.reference(path)
         result = ref.get()
-        return jsonify({"status": "success", "data": result})
+        return result
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return None
 
 def Set_data(path , value):
     if not path or value is None:
-        return jsonify({"error": "Missing path or value"}), 400
-    try:
-        ref = db.reference(path)
-        ref.set(value)
-        return jsonify({"status": "success"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return
+    ref = db.reference(path)
+    ref.set(value)
+    return
 # ///////////////////////////////////////////
 
 # ///////////////////////////////////////////
