@@ -38,14 +38,14 @@ def getUserBookings():
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     deviceId = data.get("deviceId")
-
     if not deviceId:
         return jsonify({"error": "Missing deviceId"}), 400
-    
-    ref = db.reference("bookings")
-    bookings = ref.get()
-    
-    return jsonify({"status": "success", "data": bookings})
+    try:
+        ref = db.reference("bookings")
+        result = ref.get()
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ///////////////////////////////////////////
 def Get_data(path):
