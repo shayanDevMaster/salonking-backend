@@ -43,7 +43,8 @@ def getUserBookings():
     try:
         ref = db.reference("bookings")
         result = ref.get()
-        return jsonify({"status": "success", "data": result})
+        
+        return jsonify({"status": "success", "data": result , "tye":type(result)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
