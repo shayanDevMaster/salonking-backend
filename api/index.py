@@ -32,6 +32,7 @@ def getAllSalon():
     result = ref.get()
     return jsonify({"status": "success", "data": result})
 
+
 @app.route("/getUserBookings", methods=["POST", "OPTIONS"])
 def getUserBookings():
     if request.method == "OPTIONS":
@@ -42,9 +43,15 @@ def getUserBookings():
         return jsonify({"error": "Missing deviceId"}), 400
     try:
         ref = db.reference("bookings")
-        result = ref.get()
-        
-        return jsonify({"status": "success", "data": result})
+        result = ref.get() or {}
+        # ///////
+        # Filter bookings where status is 'pending' and deviceId matches
+        filtered_bookings = [
+            booking for booking in (result.values() if isinstance(result, dict) else result)
+            if isinstance(booking, dict) and booking.get("status") == "pending" and booking.get("deviceId") == deviceId
+        ]
+
+        return jsonify({"status": "success", "data": filtered_bookings})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
