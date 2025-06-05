@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from firebase_admin import credentials, db, initialize_app
-import os
 import json
+import random
+from datetime import datetime
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -26,12 +28,264 @@ def apply_cors(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 # ///////////////////////////////////////////
+
+# ///////////////////////////////////////////
 @app.route("/getAllSalon", methods=["POST", "OPTIONS"])
 def getAllSalon():
     ref = db.reference("salons")
-    result = ref.get()
-    return jsonify({"status": "success", "data": result})
+    result = ref.get() or []
+    # Create res_bookings with all fields except 'code' and 'id'
+    res_salons = [
+        {key: value for key, value in booking.items() if key not in ["password"]}
+        for booking in result
+    ]
+    return jsonify({"status": "success", "data": res_salons})
+@app.route("/get_your_salon", methods=["POST", "OPTIONS"])
+def get_your_salon():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
 
+    data = request.get_json()
+    salon_index = data.get("salonIndex")
+    salon_name = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
+    if not salon_name:
+        return jsonify({
+            "status": "failed",
+            "salon_index": -1,
+            "salon": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "salon_index": -1,
+            "salon": None
+        })
+
+    try:
+        # Step 1: Try to get salon by salon_index if provided
+        if salon_index is not None:
+            try:
+                salon_index = int(salon_index)  # Ensure salon_index is an integer
+                salon_ref = db.reference(f"salons/{salon_index}")
+                salon = salon_ref.get()
+                if salon and salon.get("salonName") == salon_name and salon.get("password") == salon_password:
+                    return jsonify({
+                        "status": "success",
+                        "salon_index": salon_index,
+                        "salon": salon
+                    })
+            except (ValueError, TypeError):
+                # Invalid salon_index format, proceed to search by salonName
+                pass
+
+        # Step 2: Search all salons for matching salonName and password
+        ref = db.reference("salons")
+        salons = ref.get() or []  # Ensure result is a list
+
+        salon_index = next((i for i, s in enumerate(salons) if s['salonName'] == salon_name and s['password'] == salon_password), -1)
+
+        if salon_index >= 0:
+            # Salon found
+            salon = salons[salon_index]
+            return jsonify({
+                "status": "success",
+                "salon_index": salon_index,
+                "salon": salon
+            })
+        else:
+            # Salon not found
+            return jsonify({
+                "status": "failed",
+                "salon_index": -1,
+                "salon": None
+            })
+
+    except Exception as e:
+        return jsonify({
+            "status": "failed",
+            "error": str(e),
+            "salon_index": -1,
+            "salon": None
+        }), 500
+
+
+    except Exception as e:
+        return jsonify({"status": "failed" , "error": str(e) , 
+                        "salon_index": -1,
+                        "salon": None})
+    
+@app.route("/save_your_salon_setting", methods=["POST", "OPTIONS"])
+def save_your_salon_setting():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salon_index = data.get("salonIndex")
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"status": "your are not logged"}), 400
+    try:
+        # 
+        salon_index = int(salon_index)  # Ensure salon_index is an integer
+        salon_ref = db.reference(f"salons/{salon_index}")
+        salon = salon_ref.get()
+        if salon and salon.get("salonName") == salonName and salon.get("status") == "Active":
+            newSalon = {
+                "salonId" : salon.get("salonId"),
+                "salonName" : data.get("salonName"),
+                "ownerName" : data.get("ownerName"),
+                "ownerNumber" : data.get("ownerNumber"),
+                "password" : data.get("password"),
+                "location" : data.get("location"),
+                "openTime" : data.get("openTime"),
+                "closeTime" : data.get("closeTime"),
+                "SeatCount" : data.get("SeatCount"),
+                "breaks" : data.get("breaks"),
+                "WholeServiceDiscounting" : data.get("WholeServiceDiscounting"),
+                "services" : data.get("services"),
+                "ownerImage" : data.get("ownerImage"),
+                "salonImages" : data.get("salonImages"),
+                "status": "Active"
+            }
+            ref = db.reference("salons/" + str(salon_index))
+            ref.set(newSalon)
+
+            return jsonify({
+                "status": "success",
+                "salon": newSalon
+            })
+        else:
+            return jsonify({
+                "status": "Your Salon is Delete or Not found",
+                "salon": None
+            })
+
+    except Exception as e:
+        return jsonify({"status": str(e) , "salon": None})
+
+@app.route("/login", methods=["POST", "OPTIONS"])
+def login():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    salonPassword = data.get("salonPassword")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("salons")
+        result = ref.get() or {}
+        # ///////
+        salon_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['password'] == salonPassword), -1)
+
+        if salon_index >= 0:
+            # logged
+            return jsonify({"status": "success" , "salon_index": salon_index})
+        else:
+            # not found
+            return jsonify({"status": "success" , "salon_index": -1})
+
+    except Exception as e:
+        return jsonify({"status": "failed" , "error": str(e) , "salon_index": -1})
+
+@app.route("/register", methods=["POST", "OPTIONS"])
+def register():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        # ///////
+        if not data or "permissionCode" not in data:
+            return jsonify({
+                "status": "Missing permission code",
+                "salon_index": -1,
+                "salon": None
+            }), 400
+
+        # Retrieve permission code from Firebase
+        try:
+            per_code = db.reference("Permission Code").get()
+            if per_code is None:
+                return jsonify({
+                    "status": "Permission code not configured in the system",
+                    "salon_index": -1,
+                    "salon": None
+                }), 500
+        except Exception as e:
+            return jsonify({
+                "status": "Failed to retrieve permission code: " + str(e),
+                "salon_index": -1,
+                "salon": None
+            }), 500
+
+        # Validate and compare permission codes
+        provided_code = data.get("permissionCode")
+        if not isinstance(provided_code, (str, int)) or not str(provided_code).strip():
+            return jsonify({
+                "status": "Invalid permission code format",
+                "salon_index": -1,
+                "salon": None
+            }), 400
+
+        # Ensure both values are strings for comparison
+        if str(per_code).strip() != str(provided_code).strip():
+            return jsonify({
+                "status": "Incorrect permission code",
+                "salon_index": -1,
+                "salon": None
+            }), 403
+        # ///////
+        ref = db.reference("salons")
+        salons = ref.get() or {}
+        # ///////
+        salon_index = next((i for i, s in enumerate(salons) if s['salonName'] == salonName), -1)
+
+        if salon_index < 0:
+            # this salon not exists
+            salon = {
+                "salonId" : salonName + str(random.randint(1000 , 10000)),
+                "salonName" : data.get("salonName"),
+                "ownerName" : data.get("ownerName"),
+                "ownerNumber" : data.get("ownerNumber"),
+                "password" : data.get("password"),
+                "location" : data.get("location"),
+                "openTime" : data.get("openTime"),
+                "closeTime" : data.get("closeTime"),
+                "SeatCount" : data.get("SeatCount"),
+                "breaks" : data.get("breaks"),
+                "WholeServiceDiscounting" : data.get("WholeServiceDiscounting"),
+                "services" : data.get("services"),
+                "ownerImage" : data.get("ownerImage"),
+                "salonImages" : data.get("salonImages"),
+                "status": "Active"
+            }
+            # Get and increment next_salons_index
+            index_ref = db.reference("next_salons_index")
+            next_index = index_ref.get() or 0  # Default to 0 if not set
+
+            # Append salon to Firebase list at next_index
+            ref.child(str(next_index)).set(salon)
+
+            # Increment next_salons_index for the next salon
+            index_ref.set(next_index + 1)
+
+            return jsonify({
+                "status": "success",
+                "salon_index": next_index,
+                "salon": salon
+            })
+        else:
+            return jsonify({"status": "Already exist this Salon Name" , "salon_index": -1 , "salon": None})
+            
+
+    except Exception as e:
+        return jsonify({"status": "Failed: "+ str(e) , "salon_index": -1 , "salon": None})
+    
 
 @app.route("/getUserBookings", methods=["POST", "OPTIONS"])
 def getUserBookings():
@@ -55,25 +309,366 @@ def getUserBookings():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ///////////////////////////////////////////
-def Get_data(path):
-    if not path:
-        return jsonify({"error": "Missing path"}), 400
+@app.route("/getSalonBookings", methods=["POST", "OPTIONS"])
+def getSalonBookings():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
     try:
-        ref = db.reference(path)
-        result = ref.get()
-        return result
+        ref = db.reference("bookings")
+        result = ref.get() or {}
+        # ///////
+        # Filter bookings where status is 'pending' and deviceId matches
+        filtered_bookings = [
+            booking for booking in (result.values() if isinstance(result, dict) else result)
+            if isinstance(booking, dict) and booking.get("salonName") == salonName
+        ]
+
+        return jsonify({"status": "success", "data": filtered_bookings})
     except Exception as e:
-        return None
+        return jsonify({"error": str(e)}), 500
 
-def Set_data(path , value):
-    if not path or value is None:
-        return
-    ref = db.reference(path)
-    ref.set(value)
-    return
+@app.route("/getOnlyTime_SalonBookings", methods=["POST", "OPTIONS"])
+def getOnlyTime_SalonBookings():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or {}
+        # ///////
+        # Filter bookings where status is 'pending' and deviceId matches
+        filtered_bookings = [
+            booking for booking in (result.values() if isinstance(result, dict) else result)
+            if isinstance(booking, dict) and booking.get("salonName") == salonName and booking.get("status") == "pending"
+        ]
+        # Create res_bookings with only time and time_take fields
+        res_bookings = [
+            {
+                "time": booking.get("time", ""),
+                "time_take": booking.get("time_take", 0)
+            }
+            for booking in filtered_bookings
+        ]
+        return jsonify({"status": "success", "data": res_bookings})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Booking Canceling:
+@app.route("/user_cancel_booking", methods=["POST", "OPTIONS"])
+def user_cancel_booking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    deviceId = data.get("deviceId")
+    booking_code = data.get("code")
+    if not deviceId:
+        return jsonify({"error": "Missing deviceId"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        booking_index = next((i for i, s in enumerate(result) if s['deviceId'] == deviceId and s['code'] == booking_code), -1)
+        if(booking_index >= 0):
+            ref = db.reference("bookings/" + str(booking_index) + "/status")
+            ref.set("user canceled")
+
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "Booking not found or already canceled."})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e)}), 500
+
+# Baaad mai dekhta hu
+@app.route("/user_cancel_allBooking", methods=["POST", "OPTIONS"])
+def user_cancel_allBooking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    deviceId = data.get("deviceId")
+    if not deviceId:
+        return jsonify({"error": "Missing deviceId"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        b = 0
+        c = 0
+        for index, booking in enumerate(result):
+            if booking.get("deviceId") == deviceId:
+                ref = db.reference("bookings/" + str(b) + "/status")
+                ref.set("user canceled")
+                c += 1
+            b += 1
+        # 
+        if(c > 0):
+            return jsonify({"status": "success" , "count": c})
+        else:
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
+
+
+@app.route("/dash_cancel_booking", methods=["POST", "OPTIONS"])
+def dash_cancel_booking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    booking_code = data.get("code")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['code'] == booking_code and s['status'] == "pending"), -1)
+        if(booking_index >= 0):
+            ref = db.reference("bookings/" + str(booking_index) + "/status")
+            ref.set("dash canceled")
+
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "Booking not found or already canceled."})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e)}), 500
+    
+@app.route("/dash_cancel_allBooking", methods=["POST", "OPTIONS"])
+def dash_cancel_allBooking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        b = 0
+        c = 0
+        for index, booking in enumerate(result):
+            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+                ref = db.reference("bookings/" + str(b) + "/status")
+                ref.set("dash canceled")
+                c += 1
+            b += 1
+        # 
+        if(c > 0):
+            return jsonify({"status": "success" , "count": c})
+        else:
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
+    
+# Compeleting Booking:
+    
+@app.route("/dash_complete_booking", methods=["POST", "OPTIONS"])
+def dash_complete_booking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    booking_code = data.get("code")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['code'] == booking_code and s['status'] == "pending"), -1)
+        if(booking_index >= 0):
+            ref = db.reference("bookings/" + str(booking_index) + "/status")
+            ref.set("completed")
+
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "Booking not found or already canceled."})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e)}), 500
+    
+@app.route("/dash_complete_allBooking", methods=["POST", "OPTIONS"])
+def dash_complete_allBooking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        b = 0
+        c = 0
+        for index, booking in enumerate(result):
+            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+                ref = db.reference("bookings/" + str(b) + "/status")
+                ref.set("completed")
+                c += 1
+            b += 1
+        # 
+        if(c > 0):
+            return jsonify({"status": "success" , "count": c})
+        else:
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
+
+# Before All time Bookings:
+def time_to_minutes(time_str):
+    # Split "10:00 PM" -> ["10:00", "PM"]
+    time_part, period = time_str.split(' ')
+    hours, minutes = map(int, time_part.split(':'))
+
+    if period == 'PM' and hours != 12:
+        hours += 12
+    if period == 'AM' and hours == 12:
+        hours = 0
+
+    return hours * 60 + minutes
+
+# Example values
+
+@app.route("/dash_complete_allBeforeBooking", methods=["POST", "OPTIONS"])
+def dash_complete_allBeforeBooking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        b = 0
+        c = 0
+        for index, booking in enumerate(result):
+            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+
+                time = booking.get("time")
+                time_take = booking.get("time_take")
+                clean_time = time[:time.index('s')]
+
+                # Current time in minutes since midnight
+                now = datetime.now()
+                current_minutes = now.hour * 60 + now.minute
+
+                # Comparison
+                if time_to_minutes(clean_time) + time_take < current_minutes:
+                    ref = db.reference("bookings/" + str(b) + "/status")
+                    ref.set("completed")
+                    c += 1
+            b += 1
+        # 
+        if(c > 0):
+            return jsonify({"status": "success" , "count": c})
+        else:
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
+
+@app.route("/dash_cancel_allBeforeBooking", methods=["POST", "OPTIONS"])
+def dash_cancel_allBeforeBooking():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    salonName = data.get("salonName")
+    if not salonName:
+        return jsonify({"error": "Missing salonName"}), 400
+    try:
+        ref = db.reference("bookings")
+        result = ref.get() or []
+
+        b = 0
+        c = 0
+        for index, booking in enumerate(result):
+            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+                time = booking.get("time")
+                time_take = booking.get("time_take")
+                clean_time = time[:time.index('s')]
+
+                # Current time in minutes since midnight
+                now = datetime.now()
+                current_minutes = now.hour * 60 + now.minute
+
+                # Comparison
+                if time_to_minutes(clean_time) + time_take < current_minutes:
+                    ref = db.reference("bookings/" + str(b) + "/status")
+                    ref.set("dash canceled")
+                    c += 1
+            b += 1
+        # 
+        if(c > 0):
+            return jsonify({"status": "success" , "count": c})
+        else:
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
+
+
+# Bookings System
+
+@app.route("/bookAppointment", methods=["POST", "OPTIONS"])
+def bookAppointment():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    try:
+        bookings_ref = db.reference("bookings")
+
+        # this salon not exists
+        booking = {
+            "salonName": data.get("salonName"),
+            "ownerName": data.get("ownerName"),
+            "location": data.get("location"),
+            "deviceId": data.get("deviceId"),
+            "service": data.get("service"),
+            "price": data.get("price"),
+            "time": data.get("time"),
+            "time_take": data.get("time_take"),
+            "customerImage": data.get("customerImage"),
+            "customerName": data.get("customerName"),
+            "customerNumber": data.get("customerNumber"),
+            "code": data.get("code"),
+            "date": data.get("date"),
+            "status": "pending",
+        }
+        # Get and increment next_salons_index
+        index_ref = db.reference("next_boookings_index")
+        next_index = index_ref.get() or 0  # Default to 0 if not set
+
+        # Append booking to Firebase list at next_index
+        bookings_ref.child(str(next_index)).set(booking)
+
+        # Increment next_salons_index for the next booking
+        index_ref.set(next_index + 1)
+
+        return jsonify({
+            "status": "success",
+            "booking": booking
+        })
+
+    except Exception as e:
+        return jsonify({"status": "Failed: " + str(e) , "booking": None})
+@app.route("/getDefaultImages", methods=["POST", "OPTIONS"])
+def getDefaultImages():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    try:
+        ref = db.reference("defaultSalonImages")
+        result = ref.get()
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # ///////////////////////////////////////////
-
 # ///////////////////////////////////////////
 @app.route("/get", methods=["POST", "OPTIONS"])
 def get():
