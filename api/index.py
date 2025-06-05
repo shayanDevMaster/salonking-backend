@@ -27,9 +27,25 @@ def apply_cors(response):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
-# ///////////////////////////////////////////
 
 # ///////////////////////////////////////////
+
+def is_valid_pakistani_phone_number(phone):
+    phone = re.sub(r'\s|-', '', phone).strip()
+    pak_phone_regex = r'^(0|\+92)[3][0-9]{9}$'
+    valid_mobile_codes = [
+        '300', '301', '302', '303', '304', '305', '306', '307', '308', '309',
+        '310', '311', '312', '313', '314', '315', '316', '317', '318', '319',
+        '320', '321', '322', '323', '324', '325', '326', '327', '328', '329',
+        '330', '331', '332', '333', '334', '335', '336', '337', '338', '339',
+        '340', '341', '342', '343', '344', '345', '346', '347', '348', '349',
+        '360', '361', '362', '363', '364', '365', '366', '367', '368', '369'
+    ]
+    if not re.match(pak_phone_regex, phone):
+        return False
+    mobile_code = phone[3:6] if phone.startswith('+92') else phone[1:4]
+    return mobile_code in valid_mobile_codes
+
 @app.route("/getAllSalon", methods=["POST", "OPTIONS"])
 def getAllSalon():
     ref = db.reference("salons")
@@ -122,10 +138,47 @@ def save_your_salon_setting():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    
+    # /////////// Checking Authorization /////////////
     salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"status": "your are not logged"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+    
+    
     try:
         # 
         salon_index = int(salon_index)  # Ensure salon_index is an integer
@@ -314,9 +367,45 @@ def getSalonBookings():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or {}
@@ -342,11 +431,14 @@ def getOnlyTime_SalonBookings():
     try:
         ref = db.reference("bookings")
         result = ref.get() or {}
-        # ///////
+
+        # Get today's date in the format "2025-06-05"
+        today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+
         # Filter bookings where status is 'pending' and deviceId matches
         filtered_bookings = [
             booking for booking in (result.values() if isinstance(result, dict) else result)
-            if isinstance(booking, dict) and booking.get("salonName") == salonName and booking.get("status") == "pending"
+            if isinstance(booking, dict) and booking.get("salonName") == salonName and booking.get("status") == "pending" and booking.get("date") == today_date
         ]
         # Create res_bookings with only time and time_take fields
         res_bookings = [
@@ -420,7 +512,44 @@ def dash_cancel_booking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
+    if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
     booking_code = data.get("code")
     if not salonName:
         return jsonify({"error": "Missing salonName"}), 400
@@ -444,9 +573,45 @@ def dash_cancel_allBooking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
@@ -474,7 +639,44 @@ def dash_complete_booking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
+    if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
     booking_code = data.get("code")
     if not salonName:
         return jsonify({"error": "Missing salonName"}), 400
@@ -498,9 +700,45 @@ def dash_complete_allBooking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
@@ -541,9 +779,45 @@ def dash_complete_allBeforeBooking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
@@ -580,9 +854,45 @@ def dash_cancel_allBeforeBooking():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
+    # /////////// Checking Authorization /////////////
+    salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
+    salon_password = data.get("salonPassword")
+
+    # Validate required fields
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if salon_index == -1:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+
+    # Step 1: Try to get salon by salon_index if provided
+    if salon_index is not None:
+        try:
+            salon_index = int(salon_index)  # Ensure salon_index is an integer
+            salon_ref = db.reference(f"salons/{salon_index}")
+            salon = salon_ref.get()
+            if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
+                salon_index = 0
+            else:
+                return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+        except (ValueError, TypeError):
+            # Invalid salon_index format, proceed to search by salonName
+            return jsonify({
+                    "status": "failed",
+                    "data": None
+                })
+            pass
+    # ////////////////////////////////////////////
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
@@ -622,7 +932,15 @@ def bookAppointment():
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
     try:
+        
+        customer_number = data.get("customerNumber")
+        if not customer_number or not is_valid_pakistani_phone_number(customer_number):
+            return jsonify({"status": "failed", "message": "Invalid or missing customer phone number"}), 400
+        
         bookings_ref = db.reference("bookings")
+
+        # Get today's date in the format "2025-06-05"
+        today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
 
         # this salon not exists
         booking = {
@@ -638,7 +956,7 @@ def bookAppointment():
             "customerName": data.get("customerName"),
             "customerNumber": data.get("customerNumber"),
             "code": data.get("code"),
-            "date": data.get("date"),
+            "date": today_date,
             "status": "pending",
         }
         # Get and increment next_salons_index
@@ -668,7 +986,6 @@ def getDefaultImages():
         return jsonify({"status": "success", "data": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-# ///////////////////////////////////////////
 # ///////////////////////////////////////////
 @app.route("/get", methods=["POST", "OPTIONS"])
 def get():
