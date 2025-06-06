@@ -53,9 +53,17 @@ def getAllSalon():
     ref = db.reference("salons")
     result = ref.get() or []
     # Create res_bookings with all fields except 'code' and 'id'
+    # res_salons = [
+    #     {key: value for key, value in salon.items() if key not in ["password"]}
+    #     for salon in result
+    # ]
+    # Convert to list if result is a dictionary
+    salons = list(result.values()) if isinstance(result, dict) else result
+    # Filter out DeActive salons and exclude password field
     res_salons = [
-        {key: value for key, value in booking.items() if key not in ["password"]}
-        for booking in result
+        {key: value for key, value in salon.items() if key not in ["password"]}
+        for salon in salons
+        if isinstance(salon, dict) and salon.get("status") == "Active"
     ]
     return jsonify({"status": "success", "data": res_salons})
 @app.route("/get_your_salon", methods=["POST", "OPTIONS"])
@@ -96,11 +104,18 @@ def get_your_salon():
                 salon_ref = db.reference(f"salons/{salon_index}")
                 salon = salon_ref.get()
                 if salon and salon.get("salonName") == salon_name and salon.get("password") == salon_password:
-                    return jsonify({
-                        "status": "success",
-                        "salon_index": salon_index,
-                        "salon": salon
-                    })
+                    if(salon.get("status") == "Active"):
+                        return jsonify({
+                            "status": "success",
+                            "salon_index": salon_index,
+                            "salon": salon
+                        })
+                    else:
+                        return jsonify({
+                            "status": "failed",
+                            "salon_index": -1,
+                            "salon": None
+                        })
             except (ValueError, TypeError):
                 # Invalid salon_index format, proceed to search by salonName
                 pass
@@ -486,7 +501,7 @@ def user_cancel_booking():
         ref = db.reference("bookings")
         result = ref.get() or []
 
-        booking_index = next((i for i, s in enumerate(result) if s['deviceId'] == deviceId and s['code'] == booking_code), -1)
+        booking_index = next((i for i, s in enumerate(result) if s['deviceId'] == deviceId and s['status'] == "pending" and s['code'] == booking_code), -1)
         if(booking_index >= 0):
             ref = db.reference("bookings/" + str(booking_index) + "/status")
             ref.set("user canceled")
@@ -536,6 +551,8 @@ def dash_cancel_booking():
     salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
+    
+    booking_code = data.get("code")
 
     # Validate required fields
     if not salonName:
@@ -574,15 +591,14 @@ def dash_cancel_booking():
                     "data": None
                 })
             pass
-    # ////////////////////////////////////////////
-    booking_code = data.get("code")
+    
     if not salonName:
         return jsonify({"error": "Missing salonName"}), 400
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
 
-        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['code'] == booking_code and s['status'] == "pending"), -1)
+        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['status'] == "pending" and s['code'] == booking_code), -1)
         if(booking_index >= 0):
             ref = db.reference("bookings/" + str(booking_index) + "/status")
             ref.set("dash canceled")
@@ -713,13 +729,12 @@ def dash_complete_booking():
             pass
     # ////////////////////////////////////////////
     booking_code = data.get("code")
-    if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+
     try:
         ref = db.reference("bookings")
         result = ref.get() or []
 
-        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['code'] == booking_code and s['status'] == "pending"), -1)
+        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['status'] == "pending" and s['code'] == booking_code), -1)
         if(booking_index >= 0):
             ref = db.reference("bookings/" + str(booking_index) + "/status")
             ref.set("completed")
@@ -990,8 +1005,9 @@ def bookAppointment():
     try:
         
         customer_number = data.get("customerNumber")
-        if not customer_number or not is_valid_pakistani_phone_number(customer_number):
-            return jsonify({"status": "failed", "message": "Invalid or missing customer phone number"}), 400
+        if(str(customer_number) != "0000"):
+            if not customer_number or not is_valid_pakistani_phone_number(customer_number):
+                return jsonify({"status": "failed", "message": "Invalid or missing customer phone number"}), 400
         
         bookings_ref = db.reference("bookings")
 
@@ -1011,7 +1027,7 @@ def bookAppointment():
             "customerImage": data.get("customerImage"),
             "customerName": data.get("customerName"),
             "customerNumber": data.get("customerNumber"),
-            "code": random.randint(100 , 999),
+            "code": "BOOK:"+ str( random.randint(100 , 999) ),
             "date": today_date,
             "status": "pending",
         }
@@ -1040,37 +1056,6 @@ def getDefaultImages():
         ref = db.reference("defaultSalonImages")
         result = ref.get()
         return jsonify({"status": "success", "data": result})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-# ///////////////////////////////////////////
-@app.route("/get", methods=["POST", "OPTIONS"])
-def get():
-    if request.method == "OPTIONS":
-        return jsonify({}), 204  # Respond to preflight with 204 No Content
-    data = request.get_json()
-    path = data.get("path")
-    if not path:
-        return jsonify({"error": "Missing path"}), 400
-    try:
-        ref = db.reference(path)
-        result = ref.get()
-        return jsonify({"status": "success", "data": result})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/set", methods=["POST", "OPTIONS"])
-def set_data():
-    if request.method == "OPTIONS":
-        return jsonify({}), 204  # Respond to preflight with 204 No Content
-    data = request.get_json()
-    path = data.get("path")
-    value = data.get("value")
-    if not path or value is None:
-        return jsonify({"error": "Missing path or value"}), 400
-    try:
-        ref = db.reference(path)
-        ref.set(value)
-        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 # ///////////////////////////////////////////
