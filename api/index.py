@@ -880,8 +880,11 @@ def dash_complete_allBeforeBooking():
                 now = datetime.now()
                 current_minutes = now.hour * 60 + now.minute
 
+                # Get today's date in the format "2025-06-05"
+                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+
                 # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes:
+                if time_to_minutes(clean_time) + time_take < current_minutes or booking.get("date") != today_date:
                     ref = db.reference("bookings/" + str(b) + "/status")
                     ref.set("completed")
                     c += 1
@@ -959,8 +962,11 @@ def dash_cancel_allBeforeBooking():
                 now = datetime.now()
                 current_minutes = now.hour * 60 + now.minute
 
+                # Get today's date in the format "2025-06-05"
+                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+
                 # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes:
+                if time_to_minutes(clean_time) + time_take < current_minutes or booking.get("date") != today_date:
                     ref = db.reference("bookings/" + str(b) + "/status")
                     ref.set("dash canceled")
                     c += 1
