@@ -75,6 +75,12 @@ def get_your_salon():
             "salon_index": -1,
             "salon": None
         })
+    if not salon_password:
+        return jsonify({
+            "status": "failed",
+            "salon_index": -1,
+            "salon": None
+        })
     if salon_index == -1:
         return jsonify({
             "status": "failed",
@@ -148,6 +154,11 @@ def save_your_salon_setting():
 
     # Validate required fields
     if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if not salon_password:
         return jsonify({
             "status": "failed",
             "data": None
@@ -228,7 +239,9 @@ def login():
     salonName = data.get("salonName")
     salonPassword = data.get("salonPassword")
     if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+        return jsonify({"status": "Failed: Unkown Problem"}), 400
+    if not salonPassword:
+        return jsonify({"status": "Failed: Unkown Problem"}), 400
     try:
         ref = db.reference("salons")
         result = ref.get() or {}
@@ -240,7 +253,7 @@ def login():
             return jsonify({"status": "success" , "salon_index": salon_index})
         else:
             # not found
-            return jsonify({"status": "success" , "salon_index": -1})
+            return jsonify({"status": "failed" , "salon_index": -1})
 
     except Exception as e:
         return jsonify({"status": "failed" , "error": str(e) , "salon_index": -1})
@@ -376,6 +389,11 @@ def getSalonBookings():
 
     # Validate required fields
     if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if not salon_password:
         return jsonify({
             "status": "failed",
             "data": None
@@ -525,6 +543,11 @@ def dash_cancel_booking():
             "status": "failed",
             "data": None
         })
+    if not salon_password:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     if salon_index == -1:
         return jsonify({
             "status": "failed",
@@ -582,6 +605,11 @@ def dash_cancel_allBooking():
 
     # Validate required fields
     if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if not salon_password:
         return jsonify({
             "status": "failed",
             "data": None
@@ -652,6 +680,11 @@ def dash_complete_booking():
             "status": "failed",
             "data": None
         })
+    if not salon_password:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     if salon_index == -1:
         return jsonify({
             "status": "failed",
@@ -709,6 +742,11 @@ def dash_complete_allBooking():
 
     # Validate required fields
     if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if not salon_password:
         return jsonify({
             "status": "failed",
             "data": None
@@ -792,6 +830,11 @@ def dash_complete_allBeforeBooking():
             "status": "failed",
             "data": None
         })
+    if not salon_password:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     if salon_index == -1:
         return jsonify({
             "status": "failed",
@@ -863,6 +906,11 @@ def dash_cancel_allBeforeBooking():
 
     # Validate required fields
     if not salonName:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
+    if not salon_password:
         return jsonify({
             "status": "failed",
             "data": None
@@ -957,7 +1005,7 @@ def bookAppointment():
             "customerImage": data.get("customerImage"),
             "customerName": data.get("customerName"),
             "customerNumber": data.get("customerNumber"),
-            "code": data.get("code"),
+            "code": random.randint(100 , 999),
             "date": today_date,
             "status": "pending",
         }
