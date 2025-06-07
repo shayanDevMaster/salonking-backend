@@ -906,7 +906,7 @@ def dash_complete_allBeforeBooking():
                     c += 1
             b += 1
         # 
-        now = datetime.now()
+        now = datetime.now( pytz.timezone("Asia/Karachi") )
         current_minutes = now.hour * 60 + now.minute
         if(c > 0):
             return jsonify({"status": str(now.hour) + "-" + str(now.minute) + ": success" , "count": c})
