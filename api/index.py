@@ -90,7 +90,7 @@ def get_your_salon():
             "salon_index": -1,
             "salon": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "salon_index": -1,
@@ -179,7 +179,7 @@ def save_your_salon_setting():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -213,7 +213,7 @@ def save_your_salon_setting():
         salon_index = int(salon_index)  # Ensure salon_index is an integer
         salon_ref = db.reference(f"salons/{salon_index}")
         salon = salon_ref.get()
-        if salon and salon.get("salonName") == salonName and salon.get("password") == password and salon.get("status") == "Active":
+        if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password and salon.get("status") == "Active":
             newSalon = {
                 "salonName" : data.get("salonName"),
                 "ownerName" : data.get("ownerName"),
@@ -328,7 +328,7 @@ def register():
         # ///////
         salon_index = next((i for i, s in enumerate(salons) if s['salonName'] == salonName), -1)
 
-        if salon_index < 0:
+        if salon_index == -1:
             # this salon not exists
             salon = {
                 "salonId" : salonName + str(random.randint(1000 , 10000)),
@@ -413,7 +413,7 @@ def getSalonBookings():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -565,7 +565,7 @@ def dash_cancel_booking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -630,7 +630,7 @@ def dash_cancel_allBooking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -701,7 +701,7 @@ def dash_complete_booking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -766,7 +766,7 @@ def dash_complete_allBooking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -850,7 +850,7 @@ def dash_complete_allBeforeBooking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
@@ -933,7 +933,7 @@ def dash_cancel_allBeforeBooking():
             "status": "failed",
             "data": None
         })
-    if salon_index < 0:
+    if salon_index == -1:
         return jsonify({
             "status": "failed",
             "data": None
