@@ -909,9 +909,9 @@ def dash_complete_allBeforeBooking():
         now = datetime.now()
         current_minutes = now.hour * 60 + now.minute
         if(c > 0):
-            return jsonify({"status": now.hour + "-" + now.minute + ": success" , "count": c})
+            return jsonify({"status": str(now.hour) + "-" + str(now.minute) + ": success" , "count": c})
         else:
-            return jsonify({"status": now.hour + "-" + now.minute + ": Booking not found or already canceled." , "count": c})
+            return jsonify({"status": str(now.hour) + "-" + str(now.minute) + ": Booking not found or already canceled." , "count": c})
     except Exception as e:
         return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
 
