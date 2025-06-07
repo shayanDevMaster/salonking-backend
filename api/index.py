@@ -893,25 +893,23 @@ def dash_complete_allBeforeBooking():
                 clean_time = time[:time.index('s')]
 
                 # Current time in minutes since midnight
-                now = datetime.now()
+                now = datetime.now( pytz.timezone("Asia/Karachi") )
                 current_minutes = now.hour * 60 + now.minute
 
                 # Get today's date in the format "2025-06-05"
-                # today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
 
                 # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes: # or booking.get("date") != today_date:
+                if time_to_minutes(clean_time) + time_take < current_minutes or booking.get("date") != today_date:
                     ref = db.reference("bookings/" + str(b) + "/status")
                     ref.set("completed")
                     c += 1
             b += 1
         # 
-        now = datetime.now( pytz.timezone("Asia/Karachi") )
-        current_minutes = now.hour * 60 + now.minute
         if(c > 0):
-            return jsonify({"status": str(now.hour) + "-" + str(now.minute) + ": success" , "count": c})
+            return jsonify({"status": "success" , "count": c})
         else:
-            return jsonify({"status": str(now.hour) + "-" + str(now.minute) + ": Booking not found or already canceled." , "count": c})
+            return jsonify({"status": "Booking not found or already canceled." , "count": c})
     except Exception as e:
         return jsonify({"status": "Failed: " + str(e) , "count": 0}), 500
 
@@ -977,14 +975,14 @@ def dash_cancel_allBeforeBooking():
                 clean_time = time[:time.index('s')]
 
                 # Current time in minutes since midnight
-                now = datetime.now()
+                now = datetime.now( pytz.timezone("Asia/Karachi") )
                 current_minutes = now.hour * 60 + now.minute
 
                 # Get today's date in the format "2025-06-05"
-                # today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
 
                 # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes: # or booking.get("date") != today_date:
+                if time_to_minutes(clean_time) + time_take < current_minutes  or booking.get("date") != today_date:
                     ref = db.reference("bookings/" + str(b) + "/status")
                     ref.set("dash canceled")
                     c += 1
