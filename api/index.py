@@ -165,8 +165,8 @@ def save_your_salon_setting():
     
     # /////////// Checking Authorization /////////////
     salon_index = data.get("salonIndex")
-    salonName = data.get("salonName")
-    salon_password = data.get("salonPassword")
+    salonName = data.get("old_salonName")
+    salon_password = data.get("old_salonPassword")
 
     # Validate required fields
     if not salonName:
@@ -191,8 +191,9 @@ def save_your_salon_setting():
             salon_index = int(salon_index)  # Ensure salon_index is an integer
             salon_ref = db.reference(f"salons/{salon_index}")
             salon = salon_ref.get()
+            i = 1
             if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
-                salon_index = 0
+                i = 0
             else:
                 return jsonify({
                     "status": "failed",
@@ -213,7 +214,7 @@ def save_your_salon_setting():
         salon_index = int(salon_index)  # Ensure salon_index is an integer
         salon_ref = db.reference(f"salons/{salon_index}")
         salon = salon_ref.get()
-        if salon and salon.get("salonName") == salonName and salon.get("status") == "Active":
+        if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password and salon.get("status") == "Active":
             newSalon = {
                 "salonId" : salon.get("salonId"),
                 "salonName" : data.get("salonName"),
@@ -329,10 +330,10 @@ def register():
         # ///////
         salon_index = next((i for i, s in enumerate(salons) if s['salonName'] == salonName), -1)
 
-        if salon_index < 0:
+        if salon_index == -1:
             # this salon not exists
             salon = {
-                "salonId" : salonName + str(random.randint(1000 , 10000)),
+                "salonId" : + str(random.randint(10000 , 50000)),
                 "salonName" : data.get("salonName"),
                 "ownerName" : data.get("ownerName"),
                 "ownerNumber" : data.get("ownerNumber"),
@@ -402,7 +403,14 @@ def getSalonBookings():
     salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
+    salonId = data.get("salonId")
 
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     # Validate required fields
     if not salonName:
         return jsonify({
@@ -449,7 +457,7 @@ def getSalonBookings():
         # Filter bookings where status is 'pending' and deviceId matches
         filtered_bookings = [
             booking for booking in (result.values() if isinstance(result, dict) else result)
-            if isinstance(booking, dict) and booking.get("salonName") == salonName
+            if isinstance(booking, dict) and booking.get("salonId") == salonId
         ]
 
         return jsonify({"status": "success", "data": filtered_bookings})
@@ -461,9 +469,10 @@ def getOnlyTime_SalonBookings():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
     data = request.get_json()
-    salonName = data.get("salonName")
-    if not salonName:
-        return jsonify({"error": "Missing salonName"}), 400
+    
+    salonId = data.get("salonId")
+    if not salonId:
+        return jsonify({"error": "Missing salonId"}), 400
     try:
         ref = db.reference("bookings")
         result = ref.get() or {}
@@ -474,7 +483,7 @@ def getOnlyTime_SalonBookings():
         # Filter bookings where status is 'pending' and deviceId matches
         filtered_bookings = [
             booking for booking in (result.values() if isinstance(result, dict) else result)
-            if isinstance(booking, dict) and booking.get("salonName") == salonName and booking.get("status") == "pending" and booking.get("date") == today_date
+            if isinstance(booking, dict) and booking.get("salonId") == salonId and booking.get("status") == "pending" and booking.get("date") == today_date
         ]
         # Create res_bookings with only time and time_take fields
         res_bookings = [
@@ -554,6 +563,14 @@ def dash_cancel_booking():
     salon_password = data.get("salonPassword")
     
     booking_code = data.get("code")
+    salonId = data.get("salonId")
+
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
 
     # Validate required fields
     if not salonName:
@@ -599,7 +616,7 @@ def dash_cancel_booking():
         ref = db.reference("bookings")
         result = ref.get() or []
 
-        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['status'] == "pending" and s['code'] == booking_code), -1)
+        booking_index = next((i for i, s in enumerate(result) if s['salonId'] == salonId and s['status'] == "pending" and s['code'] == booking_code), -1)
         if(booking_index >= 0):
             ref = db.reference("bookings/" + str(booking_index) + "/status")
             ref.set("dash canceled")
@@ -620,6 +637,14 @@ def dash_cancel_allBooking():
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
 
+    salonId = data.get("salonId")
+
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     # Validate required fields
     if not salonName:
         return jsonify({
@@ -666,7 +691,7 @@ def dash_cancel_allBooking():
         b = 0
         c = 0
         for index, booking in enumerate(result):
-            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+            if booking.get("salonId") == salonId and booking.get("status") == "pending":
                 ref = db.reference("bookings/" + str(b) + "/status")
                 ref.set("dash canceled")
                 c += 1
@@ -690,8 +715,14 @@ def dash_complete_booking():
     salon_index = data.get("salonIndex")
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
+    salonId = data.get("salonId")
 
     # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     if not salonName:
         return jsonify({
             "status": "failed",
@@ -735,7 +766,7 @@ def dash_complete_booking():
         ref = db.reference("bookings")
         result = ref.get() or []
 
-        booking_index = next((i for i, s in enumerate(result) if s['salonName'] == salonName and s['status'] == "pending" and s['code'] == booking_code), -1)
+        booking_index = next((i for i, s in enumerate(result) if s['salonId'] == salonId and s['status'] == "pending" and s['code'] == booking_code), -1)
         if(booking_index >= 0):
             ref = db.reference("bookings/" + str(booking_index) + "/status")
             ref.set("completed")
@@ -756,6 +787,14 @@ def dash_complete_allBooking():
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
 
+    salonId = data.get("salonId")
+
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     # Validate required fields
     if not salonName:
         return jsonify({
@@ -802,7 +841,7 @@ def dash_complete_allBooking():
         b = 0
         c = 0
         for index, booking in enumerate(result):
-            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+            if booking.get("salonId") == salonId and booking.get("status") == "pending":
                 ref = db.reference("bookings/" + str(b) + "/status")
                 ref.set("completed")
                 c += 1
@@ -840,6 +879,14 @@ def dash_complete_allBeforeBooking():
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
 
+    salonId = data.get("salonId")
+
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     # Validate required fields
     if not salonName:
         return jsonify({
@@ -886,7 +933,7 @@ def dash_complete_allBeforeBooking():
         b = 0
         c = 0
         for index, booking in enumerate(result):
-            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+            if booking.get("salonId") == salonId and booking.get("status") == "pending":
 
                 time = booking.get("time")
                 time_take = booking.get("time_take")
@@ -923,6 +970,14 @@ def dash_cancel_allBeforeBooking():
     salonName = data.get("salonName")
     salon_password = data.get("salonPassword")
 
+    salonId = data.get("salonId")
+
+    # Validate required fields
+    if not salonId:
+        return jsonify({
+            "status": "failed",
+            "data": None
+        })
     # Validate required fields
     if not salonName:
         return jsonify({
@@ -969,7 +1024,7 @@ def dash_cancel_allBeforeBooking():
         b = 0
         c = 0
         for index, booking in enumerate(result):
-            if booking.get("salonName") == salonName and booking.get("status") == "pending":
+            if booking.get("salonId") == salonId and booking.get("status") == "pending":
                 time = booking.get("time")
                 time_take = booking.get("time_take")
                 clean_time = time[:time.index('s')]
@@ -1017,9 +1072,10 @@ def bookAppointment():
 
         # this salon not exists
         booking = {
-            "salonName": data.get("salonName"),
-            "ownerName": data.get("ownerName"),
-            "location": data.get("location"),
+            "salonId": data.get("salonId"),
+            # "salonName": data.get("salonName"),
+            # "ownerName": data.get("ownerName"),
+            # "location": data.get("location"),
             "deviceId": data.get("deviceId"),
             "service": data.get("service"),
             "price": data.get("price"),
