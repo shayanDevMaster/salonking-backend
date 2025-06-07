@@ -24,7 +24,8 @@ initialize_app(cred, {
 # Enable CORS for specific origins (allow local development and your deployed frontend)
 @app.after_request
 def apply_cors(response):
-    response.headers['Access-Control-Allow-Origin'] = 'http://127.0.0.1:5501'  # Allow local development
+    # response.headers['Access-Control-Allow-Origin'] = 'http://127.0.0.1:5501'  # Allow local development
+    response.headers['Access-Control-Allow-Origin'] = '*'  # Allow local development
     # For production, replace with your frontend URL (e.g., 'https://your-frontend.vercel.app')
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
