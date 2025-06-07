@@ -216,6 +216,7 @@ def save_your_salon_setting():
         salon = salon_ref.get()
         if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password and salon.get("status") == "Active":
             newSalon = {
+                "salonId" : salon.get("salonId"),
                 "salonName" : data.get("salonName"),
                 "ownerName" : data.get("ownerName"),
                 "ownerNumber" : data.get("ownerNumber"),
