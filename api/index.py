@@ -191,8 +191,9 @@ def save_your_salon_setting():
             salon_index = int(salon_index)  # Ensure salon_index is an integer
             salon_ref = db.reference(f"salons/{salon_index}")
             salon = salon_ref.get()
+            i = 1
             if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password:
-                salon_index = 0
+                i = 0
             else:
                 return jsonify({
                     "status": "failed",
