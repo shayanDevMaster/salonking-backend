@@ -1060,6 +1060,37 @@ def getDefaultImages():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 # ///////////////////////////////////////////
+@app.route("/get", methods=["POST", "OPTIONS"])
+def get():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    path = data.get("path")
+    if not path:
+        return jsonify({"error": "Missing path"}), 400
+    try:
+        ref = db.reference(path)
+        result = ref.get()
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/set", methods=["POST", "OPTIONS"])
+def set_data():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    path = data.get("path")
+    value = data.get("value")
+    if not path or value is None:
+        return jsonify({"error": "Missing path or value"}), 400
+    try:
+        ref = db.reference(path)
+        ref.set(value)
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# ///////////////////////////////////////////
 @app.route("/update", methods=["POST", "OPTIONS"])
 def update_data():
     if request.method == "OPTIONS":
