@@ -26,6 +26,8 @@ initialize_app(cred, {
 def apply_cors(response):
     # response.headers['Access-Control-Allow-Origin'] = 'http://127.0.0.1:5501'  # Allow local development
     response.headers['Access-Control-Allow-Origin'] = '*'  # Allow local development
+    # response.headers['Access-Control-Allow-Origin'] = 'https://shayanalone.github.io'  # Allow local development
+    # response.headers['Access-Control-Allow-Origin'] = 'http://www.salonking.shop'
     # For production, replace with your frontend URL (e.g., 'https://your-frontend.vercel.app')
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
@@ -51,22 +53,34 @@ def is_valid_pakistani_phone_number(phone):
 
 @app.route("/getAllSalon", methods=["POST", "OPTIONS"])
 def getAllSalon():
+    # Get pagination parameters with defaults
+    limit = int(request.args.get("limit", 50))  # Default to 50 records
+    offset = int(request.args.get("offset", 0))  # Default to start from 0
+
+    # Reference to the salons node
     ref = db.reference("salons")
-    result = ref.get() or []
-    # Create res_bookings with all fields except 'code' and 'id'
-    # res_salons = [
-    #     {key: value for key, value in salon.items() if key not in ["password"]}
-    #     for salon in result
-    # ]
-    # Convert to list if result is a dictionary
-    salons = list(result.values()) if isinstance(result, dict) else result
-    # Filter out DeActive salons and exclude password field
+    result = ref.order_by_child("status").equal_to("Active").get() or {}
+
+    # Convert to list and apply pagination
+    salons = list(result.values()) if isinstance(result, dict) else []
+    total_salons = len(salons)
+    paginated_salons = salons[offset:offset + limit]
+
+    # Filter out password field
     res_salons = [
         {key: value for key, value in salon.items() if key not in ["password"]}
-        for salon in salons
-        if isinstance(salon, dict) and salon.get("status") == "Active"
+        for salon in paginated_salons
+        if isinstance(salon, dict)
     ]
-    return jsonify({"status": "success", "data": res_salons})
+
+    return jsonify({
+        "status": "success",
+        "data": res_salons,
+        "total": total_salons,
+        "offset": offset,
+        "limit": limit
+    })
+
 @app.route("/get_your_salon", methods=["POST", "OPTIONS"])
 def get_your_salon():
     if request.method == "OPTIONS":
@@ -216,6 +230,7 @@ def save_your_salon_setting():
         salon = salon_ref.get()
         if salon and salon.get("salonName") == salonName and salon.get("password") == salon_password and salon.get("status") == "Active":
             newSalon = {
+                "salonId" : salon.get("salonId"),
                 "salonName" : data.get("salonName"),
                 "ownerName" : data.get("ownerName"),
                 "ownerNumber" : data.get("ownerNumber"),
