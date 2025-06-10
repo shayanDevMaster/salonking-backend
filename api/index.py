@@ -55,8 +55,20 @@ def is_valid_pakistani_phone_number(phone):
 def getAllSalon():
     ref = db.reference("salons")
     result = ref.get() or []
-
-    return jsonify({"status": "success", "data": result})
+    # Create res_bookings with all fields except 'code' and 'id'
+    # res_salons = [
+    #     {key: value for key, value in salon.items() if key not in ["password"]}
+    #     for salon in result
+    # ]
+    # Convert to list if result is a dictionary
+    salons = list(result.values()) if isinstance(result, dict) else result
+    # Filter out DeActive salons and exclude password field
+    res_salons = [
+        {key: value for key, value in salon.items() if key not in ["password"]}
+        for salon in salons
+        if isinstance(salon, dict) and salon.get("status") == "Active"
+    ]
+    return jsonify({"status": "success", "data": res_salons})
 @app.route("/get_your_salon", methods=["POST", "OPTIONS"])
 def get_your_salon():
     if request.method == "OPTIONS":
