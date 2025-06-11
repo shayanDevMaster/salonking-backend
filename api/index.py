@@ -1075,7 +1075,8 @@ def bookAppointment():
         _time = data.get("time")
 
         date = datetime.now(pytz.timezone("Asia/Karachi")).strftime("%Y-%m-%d")
-        if data.get("nextDayDate") == True:
+        # ye correct way hai ?
+        if data.get("nextDayDate") == "1":
             date = (datetime.now(pytz.timezone("Asia/Karachi")) + timedelta(days=1)).strftime("%Y-%m-%d")
 
         # this salon not exists
