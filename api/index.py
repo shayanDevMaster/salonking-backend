@@ -941,23 +941,25 @@ def dash_complete_allBeforeBooking():
         c = 0
         for index, booking in enumerate(result):
             if booking.get("salonId") == salonId and booking.get("status") == "pending":
+                tomorrow_date = (datetime.now(pytz.timezone("Asia/Karachi")) + timedelta(days=1)).strftime("%Y-%m-%d")
 
-                time = booking.get("time")
-                time_take = booking.get("time_take")
-                clean_time = time[:time.index('s')]
+                if booking.get("date") != tomorrow_date:
+                    time = booking.get("time")
+                    time_take = booking.get("time_take")
+                    clean_time = time[:time.index('s')]
 
-                # Current time in minutes since midnight
-                now = datetime.now( pytz.timezone("Asia/Karachi") )
-                current_minutes = now.hour * 60 + now.minute
+                    # Current time in minutes since midnight
+                    now = datetime.now( pytz.timezone("Asia/Karachi") )
+                    current_minutes = now.hour * 60 + now.minute
 
-                # Get today's date in the format "2025-06-05"
-                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+                    # Get today's date in the format "2025-06-05"
+                    today_date = datetime.now(pytz.timezone("Asia/Karachi")).strftime("%Y-%m-%d")
 
-                # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes or booking.get("date") != today_date:
-                    ref = db.reference("bookings/" + str(b) + "/status")
-                    ref.set("completed")
-                    c += 1
+                    # Comparison
+                    if time_to_minutes(clean_time) + time_take < current_minutes or booking.get("date") != today_date:
+                        ref = db.reference("bookings/" + str(b) + "/status")
+                        ref.set("completed")
+                        c += 1
             b += 1
         # 
         if(c > 0):
@@ -1032,22 +1034,26 @@ def dash_cancel_allBeforeBooking():
         c = 0
         for index, booking in enumerate(result):
             if booking.get("salonId") == salonId and booking.get("status") == "pending":
-                time = booking.get("time")
-                time_take = booking.get("time_take")
-                clean_time = time[:time.index('s')]
+                
+                tomorrow_date = (datetime.now(pytz.timezone("Asia/Karachi")) + timedelta(days=1)).strftime("%Y-%m-%d")
 
-                # Current time in minutes since midnight
-                now = datetime.now( pytz.timezone("Asia/Karachi") )
-                current_minutes = now.hour * 60 + now.minute
+                if booking.get("date") != tomorrow_date:
+                    time = booking.get("time")
+                    time_take = booking.get("time_take")
+                    clean_time = time[:time.index('s')]
 
-                # Get today's date in the format "2025-06-05"
-                today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+                    # Current time in minutes since midnight
+                    now = datetime.now( pytz.timezone("Asia/Karachi") )
+                    current_minutes = now.hour * 60 + now.minute
 
-                # Comparison
-                if time_to_minutes(clean_time) + time_take < current_minutes  or booking.get("date") != today_date:
-                    ref = db.reference("bookings/" + str(b) + "/status")
-                    ref.set("dash canceled")
-                    c += 1
+                    # Get today's date in the format "2025-06-05"
+                    today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+
+                    # Comparison
+                    if time_to_minutes(clean_time) + time_take < current_minutes  or booking.get("date") != today_date:
+                        ref = db.reference("bookings/" + str(b) + "/status")
+                        ref.set("dash canceled")
+                        c += 1
             b += 1
         # 
         if(c > 0):
