@@ -480,14 +480,15 @@ def getOnlyTime_SalonBookings():
     try:
         ref = db.reference("bookings")
         result = ref.get() or {}
+        # Get today's date in the format "2025-06-12"
+        today_date = datetime.now(pytz.timezone("Asia/Karachi")).strftime("%Y-%m-%d")
+        tomorrow_date = datetime.now(pytz.timezone("Asia/Karachi") + timedelta(days=1)).strftime("%Y-%m-%d")
 
-        # Get today's date in the format "2025-06-05"
-        today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
-
-        # Filter bookings where status is 'pending' and deviceId matches
+        # Filter bookings where status is 'pending', deviceId matches, and date is today or tomorrow
         filtered_bookings = [
             booking for booking in (result.values() if isinstance(result, dict) else result)
-            if isinstance(booking, dict) and booking.get("salonId") == salonId and booking.get("status") == "pending" and booking.get("date") == today_date
+            if isinstance(booking, dict) and booking.get("salonId") == salonId and booking.get("status") == "pending" 
+            and (booking.get("date") == today_date or booking.get("date") == tomorrow_date)
         ]
         # Create res_bookings with only time and time_take fields
         res_bookings = [
