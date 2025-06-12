@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from firebase_admin import credentials, db, initialize_app
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import re
 import os
@@ -224,6 +224,7 @@ def save_your_salon_setting():
                 "ownerNumber" : data.get("ownerNumber"),
                 "password" : data.get("password"),
                 "location" : data.get("location"),
+                "isOverTime" : data.get("isOverTime"),
                 "openTime" : data.get("openTime"),
                 "closeTime" : data.get("closeTime"),
                 "SeatCount" : data.get("SeatCount"),
@@ -341,6 +342,7 @@ def register():
                 "ownerNumber" : data.get("ownerNumber"),
                 "password" : data.get("password"),
                 "location" : data.get("location"),
+                "isOverTime" : data.get("isOverTime"),
                 "openTime" : data.get("openTime"),
                 "closeTime" : data.get("closeTime"),
                 "SeatCount" : data.get("SeatCount"),
@@ -1070,7 +1072,12 @@ def bookAppointment():
         bookings_ref = db.reference("bookings")
 
         # Get today's date in the format "2025-06-05"
-        today_date = datetime.now( pytz.timezone("Asia/Karachi") ).strftime("%Y-%m-%d")
+        _time = data.get("time")
+
+        date = datetime.now(pytz.timezone("Asia/Karachi")).strftime("%Y-%m-%d")
+        # ye correct way hai ?
+        if data.get("nextDayDate") == "1":
+            date = (datetime.now(pytz.timezone("Asia/Karachi")) + timedelta(days=1)).strftime("%Y-%m-%d")
 
         # this salon not exists
         booking = {
@@ -1081,13 +1088,13 @@ def bookAppointment():
             "deviceId": data.get("deviceId"),
             "service": data.get("service"),
             "price": data.get("price"),
-            "time": data.get("time"),
+            "time": _time,
             "time_take": data.get("time_take"),
             "customerImage": data.get("customerImage"),
             "customerName": data.get("customerName"),
             "customerNumber": data.get("customerNumber"),
             "code": "BOOK:"+ str( random.randint(100 , 999) ),
-            "date": today_date,
+            "date": date,
             "status": "pending",
         }
         # Get and increment next_salons_index
