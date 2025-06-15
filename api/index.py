@@ -296,37 +296,37 @@ def register():
             }), 400
 
         # Retrieve permission code from Firebase
-        try:
-            per_code = db.reference("Permission Code").get()
-            if per_code is None:
-                return jsonify({
-                    "status": "Permission code not configured in the system",
-                    "salon_index": -1,
-                    "salon": None
-                }), 500
-        except Exception as e:
-            return jsonify({
-                "status": "Failed to retrieve permission code: " + str(e),
-                "salon_index": -1,
-                "salon": None
-            }), 500
+        # try:
+        #     per_code = db.reference("Permission Code").get()
+        #     if per_code is None:
+        #         return jsonify({
+        #             "status": "Permission code not configured in the system",
+        #             "salon_index": -1,
+        #             "salon": None
+        #         }), 500
+        # except Exception as e:
+        #     return jsonify({
+        #         "status": "Failed to retrieve permission code: " + str(e),
+        #         "salon_index": -1,
+        #         "salon": None
+        #     }), 500
 
-        # Validate and compare permission codes
-        provided_code = data.get("permissionCode")
-        if not isinstance(provided_code, (str, int)) or not str(provided_code).strip():
-            return jsonify({
-                "status": "Invalid permission code format",
-                "salon_index": -1,
-                "salon": None
-            }), 400
+        # # Validate and compare permission codes
+        # provided_code = data.get("permissionCode")
+        # if not isinstance(provided_code, (str, int)) or not str(provided_code).strip():
+        #     return jsonify({
+        #         "status": "Invalid permission code format",
+        #         "salon_index": -1,
+        #         "salon": None
+        #     }), 400
 
-        # Ensure both values are strings for comparison
-        if str(per_code).strip() != str(provided_code).strip():
-            return jsonify({
-                "status": "Incorrect permission code",
-                "salon_index": -1,
-                "salon": None
-            }), 403
+        # # Ensure both values are strings for comparison
+        # if str(per_code).strip() != str(provided_code).strip():
+        #     return jsonify({
+        #         "status": "Incorrect permission code",
+        #         "salon_index": -1,
+        #         "salon": None
+        #     }), 403
         # ///////
         ref = db.reference("salons")
         salons = ref.get() or {}
