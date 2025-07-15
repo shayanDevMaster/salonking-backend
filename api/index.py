@@ -75,6 +75,56 @@ class Student:
             "FeesHistory": [fee.to_dict() for fee in self.FeesHistory]
         }
 
+class DetailedMonthlyIncome:
+    def __init__(self, class_name, month, totalStudent, feesCollection_pkr, pendingFees_pkr, collectionRate):
+        self.class_name = class_name
+        self.month = month
+        self.totalStudent = totalStudent
+        self.feesCollection_pkr = feesCollection_pkr
+        self.pendingFees_pkr = pendingFees_pkr
+        self.collectionRate = collectionRate
+
+    def to_dict(self):
+        return {
+            "class_name": self.class_name,
+            "month": self.month,
+            "totalStudent": self.totalStudent,
+            "feesCollection_pkr": self.feesCollection_pkr,
+            "pendingFees_pkr": self.pendingFees_pkr,
+            "collectionRate": self.collectionRate
+        }
+
+@app.route("/get_DetailedMonthlyIncome", methods=["POST", "OPTIONS"])
+def get_DetailedMonthlyIncome():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    totalStudent_list = [1001, 10021, 13001, 10014, 10501]
+    collectionRate_list = [100, 90, 12, 32, 32]
+    pendingFees_pkr_list = [1200, 3100, 4500, 1000, 900]
+    feesCollection_pkr_list = [8000, 9000, 4000, 2000, 2500]
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November"]
+
+    detailedMonthlyIncome = []
+
+    for _ in range(random.randint(2, 7)):
+        income = DetailedMonthlyIncome(
+            class_name=str(random.randint(6, 10)),
+            month=random.choice(months),
+            totalStudent=random.choice(totalStudent_list),
+            feesCollection_pkr=random.choice(feesCollection_pkr_list),
+            pendingFees_pkr=random.choice(pendingFees_pkr_list),
+            collectionRate=random.choice(collectionRate_list)
+        )
+
+        detailedMonthlyIncome.append(income.to_dict())
+
+    return jsonify({
+        "status": "success",
+        "data": detailedMonthlyIncome
+    })
+
+
 @app.route("/get_AllStudentData", methods=["POST", "OPTIONS"])
 def get_AllStudentData():
     if request.method == "OPTIONS":
