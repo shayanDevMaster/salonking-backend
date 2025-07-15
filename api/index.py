@@ -37,42 +37,94 @@ def apply_cors(response):
 
 
 
+class FeeHistory:
+    def __init__(self, dueDate, payDate, purpose, amount, status):
+        self.dueDate = dueDate # as string
+        self.payDate = payDate # as string
+        self.purpose = purpose  # as string
+        self.amount = amount # as int
+        self.status = status # as string
+
+    def to_dict(self):
+        return {
+            "dueDate": self.dueDate,
+            "payDate": self.payDate,
+            "purpose": self.purpose,
+            "amount": self.amount,
+            "status": self.status
+        }
 
 class Student:
-    def __init__(self, class_name, roll_number, name):
+    def __init__(self, class_name, roll_number, name , parentName , address , contactNumber , feesHistory):
         self.class_name = class_name
         self.roll_number = roll_number
         self.name = name
+        self.parentName = parentName
+        self.address = address
+        self.contactNumber = contactNumber
+        self.FeesHistory = feesHistory  # ← list of FeeHistory objects
 
     def to_dict(self):
         return {
             "class": self.class_name,
             "rollNumber": self.roll_number,
-            "name": self.name
+            "name": self.name,
+            "parentName": self.parentName,
+            "address": self.address,
+            "contactNumber": self.contactNumber,
+            "FeesHistory": [fee.to_dict() for fee in self.FeesHistory]
         }
+
+import random
+from datetime import datetime, timedelta
 
 @app.route("/get_LoginStudentData", methods=["POST", "OPTIONS"])
 def get_LoginStudentData():
     if request.method == "OPTIONS":
         return jsonify({}), 204  # Respond to preflight with 204 No Content
+
     data = request.get_json()
     
-    # /////////// Checking Authorization /////////////
     Class = data.get("class")
     roll = data.get("rollNumber")
-    
-    student = Student(class_name=Class, roll_number=roll, name="ALIYAAN Shahid")
+
+    # Random mock data
+    names = ["Aliyaan Shahid", "Ahmed Raza", "Fatima Noor", "Sara Ahmed"]
+    parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
+    addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
+    contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
+    purposes = ["January Fee", "February Fee", "March Fee"]
+    status_list = ["Paid", "Unpaid"]
+
+    # Generate random fee history (2–3 records)
+    feesHistory = []
+    for i in range(random.randint(2, 7)):
+        due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
+        pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        fee = FeeHistory(
+            dueDate=due_date,
+            payDate=pay_date,
+            purpose=random.choice(purposes),
+            amount=random.choice([1500, 2000, 2500]),
+            status="Paid" if pay_date else "Unpaid"
+        )
+        feesHistory.append(fee)
+
+    # Create random student object
+    student = Student(
+        class_name=Class,
+        roll_number=roll,
+        name=random.choice(names),
+        parentName=random.choice(parents),
+        address=random.choice(addresses),
+        contactNumber=random.choice(contacts),
+        feesHistory=feesHistory
+    )
 
     return jsonify({
-        "status": "failed",
+        "status": "success",
         "data": student.to_dict()
     })
-
-
-
-
-
-
 
 
 
