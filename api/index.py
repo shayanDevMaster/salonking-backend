@@ -75,8 +75,53 @@ class Student:
             "FeesHistory": [fee.to_dict() for fee in self.FeesHistory]
         }
 
-import random
-from datetime import datetime, timedelta
+@app.route("/get_AllStudentData", methods=["POST", "OPTIONS"])
+def get_AllStudentData():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Preflight
+
+    # Random mock data sources
+    names = ["Aliyaan Shahid", "Ahmed Raza", "Fatima Noor", "Sara Ahmed"]
+    parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
+    addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
+    contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
+    purposes = ["January Fee", "February Fee", "March Fee"]
+
+    students = []
+    for s in range(random.randint(2, 7)):
+
+        # Random fee history for each student
+        feesHistory = []
+        for i in range(random.randint(2, 4)):
+            due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
+            pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+            fee = FeeHistory(
+                dueDate=due_date,
+                payDate=pay_date,
+                purpose=random.choice(purposes),
+                amount=random.choice([1500, 2000, 2500]),
+                status="Paid" if pay_date else "Unpaid"
+            )
+            feesHistory.append(fee)
+
+        # Random student data
+        student = Student(
+            class_name=str(random.randint(6, 10)),
+            roll_number=str(random.randint(1, 50)),
+            name=random.choice(names),
+            parentName=random.choice(parents),
+            address=random.choice(addresses),
+            contactNumber=random.choice(contacts),
+            feesHistory=feesHistory
+        )
+
+        students.append(student.to_dict())
+
+    return jsonify({
+        "status": "success",
+        "data": students
+    })
+
 
 @app.route("/get_LoginStudentData", methods=["POST", "OPTIONS"])
 def get_LoginStudentData():
