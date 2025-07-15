@@ -35,6 +35,98 @@ def apply_cors(response):
 
 # ///////////////////////////////////////////
 
+
+
+
+class Student:
+    def __init__(self, class_name, roll_number, name):
+        self.class_name = class_name
+        self.roll_number = roll_number
+        self.name = name
+
+    def to_dict(self):
+        return {
+            "class": self.class_name,
+            "rollNumber": self.roll_number,
+            "name": self.name
+        }
+
+@app.route("/get_LoginStudentData", methods=["POST", "OPTIONS"])
+def get_LoginStudentData():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
+    data = request.get_json()
+    
+    # /////////// Checking Authorization /////////////
+    Class = data.get("class")
+    roll = data.get("rollNumber")
+    
+    student = Student(class_name=Class, roll_number=roll, name="Shayan Shahid")
+
+    return jsonify({
+        "status": "failed",
+        "data": student.to_dict()
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#//////////////////////////////////////////////////////
+
 def is_valid_pakistani_phone_number(phone):
     phone = re.sub(r'\s|-', '', phone).strip()
     pak_phone_regex = r'^(0|\+92)[3][0-9]{9}$'
