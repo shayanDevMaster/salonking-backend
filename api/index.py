@@ -100,13 +100,15 @@ def get_LoginStudentData():
     feesHistory = []
     for i in range(random.randint(2, 7)):
         due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
-        pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        # pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        pay_date = None
         fee = FeeHistory(
             dueDate=due_date,
             payDate=pay_date,
             purpose=random.choice(purposes),
             amount=random.choice([1500, 2000, 2500]),
-            status="Paid" if pay_date else "Unpaid"
+            # status="Paid" if pay_date else "Unpaid"
+            status="Unpaid"
         )
         feesHistory.append(fee)
 
