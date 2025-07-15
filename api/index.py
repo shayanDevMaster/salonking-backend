@@ -61,7 +61,7 @@ def get_LoginStudentData():
     Class = data.get("class")
     roll = data.get("rollNumber")
     
-    student = Student(class_name=Class, roll_number=roll, name="Shayan Shahid")
+    student = Student(class_name=Class, roll_number=roll, name="ALIYAAN Shahid")
 
     return jsonify({
         "status": "failed",
