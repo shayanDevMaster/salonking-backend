@@ -55,10 +55,11 @@ class FeeHistory:
         }
 
 class Student:
-    def __init__(self, class_name, roll_number, name , parentName , address , contactNumber , feesHistory):
+    def __init__(self, class_name, roll_number, password , parentName , address , contactNumber , feesHistory):
         self.class_name = class_name
         self.roll_number = roll_number
         self.name = name
+        self.password = password
         self.parentName = parentName
         self.address = address
         self.contactNumber = contactNumber
@@ -69,6 +70,7 @@ class Student:
             "class": self.class_name,
             "rollNumber": self.roll_number,
             "name": self.name,
+            "password": self.password,
             "parentName": self.parentName,
             "address": self.address,
             "contactNumber": self.contactNumber,
@@ -76,8 +78,7 @@ class Student:
         }
 
 class DetailedMonthlyIncome:
-    def __init__(self, class_name, month, totalStudent, feesCollection_pkr, pendingFees_pkr, collectionRate):
-        self.class_name = class_name
+    def __init__(self , month, totalStudent, feesCollection_pkr, pendingFees_pkr, collectionRate):
         self.month = month
         self.totalStudent = totalStudent
         self.feesCollection_pkr = feesCollection_pkr
@@ -86,7 +87,6 @@ class DetailedMonthlyIncome:
 
     def to_dict(self):
         return {
-            "class_name": self.class_name,
             "month": self.month,
             "totalStudent": self.totalStudent,
             "feesCollection_pkr": self.feesCollection_pkr,
@@ -109,7 +109,6 @@ def get_DetailedMonthlyIncome():
 
     for _ in range(random.randint(2, 7)):
         income = DetailedMonthlyIncome(
-            class_name=str(random.randint(6, 10)),
             month=random.choice(months),
             totalStudent=random.choice(totalStudent_list),
             feesCollection_pkr=random.choice(feesCollection_pkr_list),
@@ -182,6 +181,7 @@ def get_LoginStudentData():
     
     Class = data.get("class")
     roll = data.get("rollNumber")
+    password = data.get("password")
 
     # Random mock data
     names = ["Aliyaan Shahid", "Ahmed Raza", "Fatima Noor", "Sara Ahmed"]
@@ -207,6 +207,7 @@ def get_LoginStudentData():
 
     # Create random student object
     student = Student(
+        password=password,
         class_name=Class,
         roll_number=roll,
         name=random.choice(names),
