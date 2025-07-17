@@ -208,8 +208,8 @@ def get_LoginStudentData():
     # Generate random fee history (2–3 records)
     feesHistory = []
     for i in range(random.randint(2, 7)):
-        due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
-        pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
+        pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
             class_number=str(random.randint(1, 11)),
             dueDate=due_date,
