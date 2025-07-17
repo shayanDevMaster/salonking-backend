@@ -118,7 +118,7 @@ def get_DetailedMonthlyIncome():
 
     detailedMonthlyIncome = []
 
-    for _ in range(random.randint(2, 7)):
+    for _ in range(random.randint(7, 30)):
         income = DetailedMonthlyIncome(
             month=random.choice(months),
             totalStudent=random.choice(totalStudent_list),
@@ -148,11 +148,11 @@ def get_AllStudentData():
     purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     pass_word = "qww"
     students = []
-    for s in range(random.randint(2, 7)):
+    for s in range(random.randint(200, 300)):
 
         # Random fee history for each student
         feesHistory = []
-        for i in range(random.randint(2, 4)):
+        for i in range(random.randint(10, 30)):
             due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
             pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
@@ -207,7 +207,7 @@ def get_LoginStudentData():
     
     # Generate random fee history (2–3 records)
     feesHistory = []
-    for i in range(random.randint(2, 7)):
+    for i in range(random.randint(7, 30)):
         due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
         pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
