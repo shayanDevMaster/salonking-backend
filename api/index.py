@@ -38,7 +38,8 @@ def apply_cors(response):
 
 
 class FeeHistory:
-    def __init__(self, dueDate, payDate, purpose, amount, status):
+    def __init__(self, class_number , dueDate, payDate, purpose, amount, status):
+        self.class_number = class_number # as string
         self.dueDate = dueDate # as string
         self.payDate = payDate # as string
         self.purpose = purpose  # as string
@@ -47,6 +48,7 @@ class FeeHistory:
 
     def to_dict(self):
         return {
+            "class_number": self.class_number,
             "dueDate": self.dueDate,
             "payDate": self.payDate,
             "purpose": self.purpose,
@@ -143,7 +145,7 @@ def get_AllStudentData():
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
-    purposes = ["January Fee", "February Fee", "March Fee"]
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     pass_word = "qww"
     students = []
     for s in range(random.randint(2, 7)):
@@ -154,6 +156,7 @@ def get_AllStudentData():
             due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
             pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
+                class_number=str(random.randint(1, 11)),
                 dueDate=due_date,
                 payDate=pay_date,
                 purpose=random.choice(purposes),
@@ -198,7 +201,7 @@ def get_LoginStudentData():
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
-    purposes = ["January Fee", "February Fee", "March Fee"]
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     status_list = ["Paid", "Unpaid"]
     pass_word = "1234567"
     
@@ -208,6 +211,7 @@ def get_LoginStudentData():
         due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
         pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
+            class_number=str(random.randint(1, 11)),
             dueDate=due_date,
             payDate=pay_date,
             purpose=random.choice(purposes),
