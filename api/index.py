@@ -55,10 +55,11 @@ class FeeHistory:
         }
 
 class Student:
-    def __init__(self, class_name, roll_number, name, parentName, address, contactNumber, feesHistory):
+    def __init__(self, class_name, roll_number, name , password , parentName, address, contactNumber, feesHistory):
         self.class_name = class_name
         self.roll_number = roll_number
         self.name = name
+        self.password = password
         self.parentName = parentName
         self.address = address
         self.contactNumber = contactNumber
@@ -143,7 +144,7 @@ def get_AllStudentData():
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
     purposes = ["January Fee", "February Fee", "March Fee"]
-
+    pass_word = "qww"
     students = []
     for s in range(random.randint(2, 7)):
 
@@ -166,6 +167,7 @@ def get_AllStudentData():
             class_name=str(random.randint(6, 10)),
             roll_number=str(random.randint(1, 50)),
             name=random.choice(names),
+            password=pass_word,
             parentName=random.choice(parents),
             address=random.choice(addresses),
             contactNumber=random.choice(contacts),
@@ -198,7 +200,8 @@ def get_LoginStudentData():
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
     purposes = ["January Fee", "February Fee", "March Fee"]
     status_list = ["Paid", "Unpaid"]
-
+    pass_word = "1234567"
+    
     # Generate random fee history (2–3 records)
     feesHistory = []
     for i in range(random.randint(2, 7)):
@@ -218,6 +221,7 @@ def get_LoginStudentData():
         class_name=Class,
         roll_number=roll,
         name=random.choice(names),
+        password=pass_word,
         parentName=random.choice(parents),
         address=random.choice(addresses),
         contactNumber=random.choice(contacts),
