@@ -55,17 +55,15 @@ class FeeHistory:
         }
 
 class Student:
-    def __init__(self, class_name, roll_number, password , parentName , address , contactNumber , feesHistory):
+    def __init__(self, class_name, roll_number, name, parentName, address, contactNumber, feesHistory):
         self.class_name = class_name
         self.roll_number = roll_number
         self.name = name
-        self.password = password
         self.parentName = parentName
         self.address = address
         self.contactNumber = contactNumber
-        self.FeesHistory = feesHistory  # ← list of FeeHistory objects
+        self.FeesHistory = feesHistory
 
-            # "password": self.password,
     def to_dict(self):
         return {
             "class": self.class_name,
@@ -76,6 +74,7 @@ class Student:
             "contactNumber": self.contactNumber,
             "FeesHistory": [fee.to_dict() for fee in self.FeesHistory]
         }
+
 
 class DetailedMonthlyIncome:
     def __init__(self , month, totalStudent, feesCollection_pkr, pendingFees_pkr, collectionRate):
@@ -166,7 +165,6 @@ def get_AllStudentData():
         student = Student(
             class_name=str(random.randint(6, 10)),
             roll_number=str(random.randint(1, 50)),
-            password="100",
             name=random.choice(names),
             parentName=random.choice(parents),
             address=random.choice(addresses),
@@ -219,7 +217,6 @@ def get_LoginStudentData():
     student = Student(
         class_name=Class,
         roll_number=roll,
-        password=password,
         name=random.choice(names),
         parentName=random.choice(parents),
         address=random.choice(addresses),
