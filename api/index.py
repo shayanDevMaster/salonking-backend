@@ -166,7 +166,7 @@ def get_AllStudentData():
         student = Student(
             class_name=str(random.randint(6, 10)),
             roll_number=str(random.randint(1, 50)),
-            password="100"
+            password="100",
             name=random.choice(names),
             parentName=random.choice(parents),
             address=random.choice(addresses),
