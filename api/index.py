@@ -65,12 +65,12 @@ class Student:
         self.contactNumber = contactNumber
         self.FeesHistory = feesHistory  # ← list of FeeHistory objects
 
+            # "password": self.password,
     def to_dict(self):
         return {
             "class": self.class_name,
             "rollNumber": self.roll_number,
             "name": self.name,
-            "password": self.password,
             "parentName": self.parentName,
             "address": self.address,
             "contactNumber": self.contactNumber,
@@ -207,9 +207,9 @@ def get_LoginStudentData():
 
     # Create random student object
     student = Student(
-        password=password,
         class_name=Class,
         roll_number=roll,
+        password=password,
         name=random.choice(names),
         parentName=random.choice(parents),
         address=random.choice(addresses),
