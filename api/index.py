@@ -211,7 +211,7 @@ def get_LoginStudentData():
         due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
         pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
-            class_number=str(random.randint(1, 10)),
+            class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
             dueDate=due_date,
             payDate=pay_date,
             purpose=random.choice(purposes),
