@@ -96,6 +96,14 @@ class DetailedMonthlyIncome:
             "collectionRate": self.collectionRate
         }
 
+@app.route("/editStudentData", methods=["POST", "OPTIONS"])
+def editStudentData():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    return jsonify({
+        "status": "success",
+    })
 @app.route("/addNewStudent", methods=["POST", "OPTIONS"])
 def addNewStudent():
     if request.method == "OPTIONS":
