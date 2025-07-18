@@ -38,7 +38,8 @@ def apply_cors(response):
 
 
 class FeeHistory:
-    def __init__(self, class_number , dueDate, payDate, purpose, amount, status):
+    def __init__(self, record_Id , class_number , dueDate, payDate, purpose, amount, status):
+        self.record_Id = record_Id # as string
         self.class_number = class_number # as string
         self.dueDate = dueDate # as string
         self.payDate = payDate # as string
@@ -48,6 +49,7 @@ class FeeHistory:
 
     def to_dict(self):
         return {
+            "record_Id": self.record_Id,
             "class_number": self.class_number,
             "dueDate": self.dueDate,
             "payDate": self.payDate,
@@ -96,6 +98,22 @@ class DetailedMonthlyIncome:
             "collectionRate": self.collectionRate
         }
 
+@app.route("/payAdmin_StudentPay", methods=["POST", "OPTIONS"])
+def payAdmin_StudentPay():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    return jsonify({
+        "status": "success",
+    })
+@app.route("/payStudentPay", methods=["POST", "OPTIONS"])
+def payStudentPay():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    return jsonify({
+        "status": "success",
+    })
 @app.route("/editStudentData", methods=["POST", "OPTIONS"])
 def editStudentData():
     if request.method == "OPTIONS":
@@ -172,6 +190,7 @@ def get_AllStudentData():
             due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
             pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
+                record_Id=str(random.randint(100, 1000)),
                 class_number=str(random.randint(1, 11)),
                 dueDate=due_date,
                 payDate=pay_date,
@@ -227,6 +246,7 @@ def get_LoginStudentData():
         due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
         pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
+            record_Id=str(random.randint(100, 1000)),
             class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
             dueDate=due_date,
             payDate=pay_date,
@@ -281,6 +301,7 @@ def getAdmin_LoginStudentData():
         due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
         pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
         fee = FeeHistory(
+            record_Id=str(random.randint(100, 1000)),
             class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
             dueDate=due_date,
             payDate=pay_date,
