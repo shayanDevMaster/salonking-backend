@@ -58,6 +58,7 @@ class FeeHistory:
             "status": self.status
         }
 
+
 class Student:
     def __init__(self, class_name, roll_number, name , password , parentName, address, contactNumber, feesHistory):
         self.class_name = class_name
@@ -98,6 +99,25 @@ class DetailedMonthlyIncome:
             "collectionRate": self.collectionRate
         }
 
+class PaymentProceess_RESULT:
+    def __init__(self, paidFees_Record, TotalPayAmmounrt):
+        self.TotalPayAmmounrt = TotalPayAmmounrt
+        self.paidFees_Record = paidFees_Record
+
+    def to_dict(self):
+        return {
+            "TotalPayAmmounrt": self.TotalPayAmmounrt,
+            "paidFees_Record": [fee.to_dict() for fee in self.paidFees_Record]
+        }
+
+@app.route("/payAdmin_StudentPay", methods=["POST", "OPTIONS"])
+def return_StudentPay_Complete():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    return jsonify({
+        "status": "success",
+    })
 @app.route("/payAdmin_StudentPay", methods=["POST", "OPTIONS"])
 def payAdmin_StudentPay():
     if request.method == "OPTIONS":
@@ -111,9 +131,45 @@ def payStudentPay():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
-    return jsonify({
-        "status": "success",
-    })
+    try:
+        data = request.get_json()
+        selected_fees = data.get("selectedFees", [])
+
+        total_amount = 0
+        paid_fees_record = []
+
+        for fee in selected_fees:
+            amount = int(fee.get("amount", 0))
+            purpose = fee.get("purpose", "")
+            due_date = fee.get("dueDate", "")
+            fee_id = fee.get("id", "")
+            class_number = fee.get("class_number", "")
+
+            total_amount += amount
+
+            paid_fees_record.append({
+                "amount": amount,
+                "purpose": purpose,
+                "dueDate": due_date,
+                "payDate": due_date,  # or you can use current date
+                "id": fee_id,
+                "class_number": class_number,
+                "status": "Paid"
+            })
+
+        return jsonify({
+            "status": "success",
+            "data": {
+                "TotalPayAmmounrt": total_amount,
+                "paidFees_Record": paid_fees_record
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 @app.route("/editStudentData", methods=["POST", "OPTIONS"])
 def editStudentData():
     if request.method == "OPTIONS":
