@@ -57,25 +57,23 @@ class FeeHistory:
             "amount": self.amount,
             "status": self.status
         }
+
+# Dummy class definition
 class CustomeFeeRecords:
-    def __init__(self, record_Id , class_number , dueDate, payDate, purpose, amount, status):
-        self.record_Id = record_Id # as string
-        self.class_number = class_number # as string
-        self.dueDate = dueDate # as string
-        self.payDate = payDate # as string
-        self.purpose = purpose  # as string
-        self.amount = amount # as int
-        self.status = status # as string
+    def __init__(self, record_Id, class_number, dueDate, purpose, amount):
+        self.record_Id = record_Id
+        self.class_number = class_number
+        self.dueDate = dueDate
+        self.purpose = purpose
+        self.amount = amount
 
     def to_dict(self):
         return {
             "record_Id": self.record_Id,
             "class_number": self.class_number,
             "dueDate": self.dueDate,
-            "payDate": self.payDate,
             "purpose": self.purpose,
-            "amount": self.amount,
-            "status": self.status
+            "amount": self.amount
         }
 
 
@@ -282,22 +280,26 @@ def get_DetailedMonthlyIncome():
         "status": "success",
         "data": detailedMonthlyIncome
     })
+
 @app.route("/get_CustomeFees", methods=["POST", "OPTIONS"])
 def get_CustomeFees():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
-    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", 
+                "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    
     customeFeeRecords = []
+
     for i in range(random.randint(7, 30)):
-        due_date = (datetime.today() - timedelta(days=random.randint(30 , 100))).strftime("%Y-%m-%d")
-        pay_date = (datetime.today() - timedelta(days=random.randint(20 , 50))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
+        
         fee = CustomeFeeRecords(
             record_Id=str(random.randint(100, 1000)),
-            class_number=str(random.rangeint(1, 10)),
+            class_number=str(random.randint(1, 10)),  # ✅ FIXED HERE
             dueDate=due_date,
             purpose=random.choice(purposes),
-            amount=random.choice([1500, 2000, 2500]),
+            amount=random.choice([1500, 2000, 2500])
         )
         customeFeeRecords.append(fee.to_dict())
 
@@ -305,7 +307,6 @@ def get_CustomeFees():
         "status": "success",
         "data": customeFeeRecords
     })
-
 
 @app.route("/get_AllStudentData", methods=["POST", "OPTIONS"])
 def get_AllStudentData():
