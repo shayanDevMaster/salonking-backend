@@ -75,6 +75,19 @@ class CustomeFeeRecords:
             "purpose": self.purpose,
             "amount": self.amount
         }
+# Dummy class definition
+class MonthlyFeesSetting:
+    def __init__(self, class_number, monthEndDay, amount):
+        self.class_number = class_number
+        self.monthEndDay = monthEndDay
+        self.amount = amount
+
+    def to_dict(self):
+        return {
+            "class_number": self.class_number,
+            "monthEndDay": self.monthEndDay,
+            "amount": self.amount
+        }
 
 
 class Student:
@@ -279,6 +292,31 @@ def get_DetailedMonthlyIncome():
     return jsonify({
         "status": "success",
         "data": detailedMonthlyIncome
+    })
+
+@app.route("/get_AllMonthlyFees", methods=["POST", "OPTIONS"])
+def get_AllMonthlyFees():
+    if request.method == "OPTIONS":
+        return jsonify({}), 204
+
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", 
+                "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    
+    monthlyFeesSetting = []
+
+    for i in range(10):
+        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
+        
+        fee = MonthlyFeesSetting(
+            class_number=str(i),  # ✅ FIXED HERE
+            monthEndDay=due_date,
+            amount=random.choice([1500, 2000, 2500 , 1000, 3000, 3500, 4000, 4500, 5000])
+        )
+        monthlyFeesSetting.append(fee.to_dict())
+
+    return jsonify({
+        "status": "success",
+        "data": monthlyFeesSetting
     })
 
 @app.route("/get_CustomeFees", methods=["POST", "OPTIONS"])
