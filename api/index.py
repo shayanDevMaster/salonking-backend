@@ -135,7 +135,7 @@ def payAdmin_StudentPay():
             amount = int(fee.get("amount", 0))
             purpose = fee.get("purpose", "")
             due_date = fee.get("dueDate", "")
-            fee_id = fee.get("id", "")
+            fee_id = fee.get("record_Id", "")
             class_number = fee.get("class_number", "")
 
             total_amount += amount
@@ -145,7 +145,7 @@ def payAdmin_StudentPay():
                 "purpose": purpose,
                 "dueDate": due_date,
                 "payDate": due_date,  # or you can use current date
-                "id": fee_id,
+                "record_Id": fee_id,
                 "class_number": class_number,
                 "status": "Paid"
             })
@@ -180,7 +180,7 @@ def payStudentPay():
             amount = int(fee.get("amount", 0))
             purpose = fee.get("purpose", "")
             due_date = fee.get("dueDate", "")
-            fee_id = fee.get("id", "")
+            fee_id = fee.get("record_Id", "")
             class_number = fee.get("class_number", "")
 
             total_amount += amount
@@ -190,7 +190,7 @@ def payStudentPay():
                 "purpose": purpose,
                 "dueDate": due_date,
                 "payDate": due_date,  # or you can use current date
-                "id": fee_id,
+                "record_Id": fee_id,
                 "class_number": class_number,
                 "status": "Paid"
             })
