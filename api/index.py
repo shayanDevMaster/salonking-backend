@@ -118,14 +118,52 @@ def return_StudentPay_Complete():
     return jsonify({
         "status": "success",
     })
+    
 @app.route("/payAdmin_StudentPay", methods=["POST", "OPTIONS"])
 def payAdmin_StudentPay():
     if request.method == "OPTIONS":
         return jsonify({}), 204
+    
+    try:
+        data = request.get_json()
+        selected_fees = data.get("selectedFees", [])
 
-    return jsonify({
-        "status": "success",
-    })
+        total_amount = 0
+        paid_fees_record = []
+
+        for fee in selected_fees:
+            amount = int(fee.get("amount", 0))
+            purpose = fee.get("purpose", "")
+            due_date = fee.get("dueDate", "")
+            fee_id = fee.get("id", "")
+            class_number = fee.get("class_number", "")
+
+            total_amount += amount
+
+            paid_fees_record.append({
+                "amount": amount,
+                "purpose": purpose,
+                "dueDate": due_date,
+                "payDate": due_date,  # or you can use current date
+                "id": fee_id,
+                "class_number": class_number,
+                "status": "Paid"
+            })
+
+        return jsonify({
+            "status": "success",
+            "data": {
+                "pay_date" : datetime.now().strftime('%d-%m-%Y')
+                "TotalPayAmmounrt": total_amount,
+                "paidFees_Record": paid_fees_record
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 @app.route("/payStudentPay", methods=["POST", "OPTIONS"])
 def payStudentPay():
     if request.method == "OPTIONS":
@@ -160,6 +198,7 @@ def payStudentPay():
         return jsonify({
             "status": "success",
             "data": {
+                "pay_date" : datetime.now().strftime('%d-%m-%Y')
                 "TotalPayAmmounrt": total_amount,
                 "paidFees_Record": paid_fees_record
             }
