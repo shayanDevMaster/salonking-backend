@@ -153,7 +153,7 @@ def payAdmin_StudentPay():
         return jsonify({
             "status": "success",
             "data": {
-                "pay_date" : datetime.now().strftime('%d-%m-%Y')
+                "pay_date" : datetime.now().strftime('%d-%m-%Y'),
                 "TotalPayAmmounrt": total_amount,
                 "paidFees_Record": paid_fees_record
             }
@@ -198,7 +198,7 @@ def payStudentPay():
         return jsonify({
             "status": "success",
             "data": {
-                "pay_date" : datetime.now().strftime('%d-%m-%Y')
+                "pay_date" : datetime.now().strftime('%d-%m-%Y'),
                 "TotalPayAmmounrt": total_amount,
                 "paidFees_Record": paid_fees_record
             }
