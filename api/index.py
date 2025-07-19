@@ -60,8 +60,8 @@ class FeeHistory:
 
 
 class Student:
-    def __init__(self, class_name, roll_number, name , password , parentName, address, contactNumber, feesHistory):
-        self.class_name = class_name
+    def __init__(self, class_number, roll_number, name , password , parentName, address, contactNumber, feesHistory):
+        self.class_number = class_number
         self.roll_number = roll_number
         self.name = name
         self.password = password
@@ -72,7 +72,7 @@ class Student:
 
     def to_dict(self):
         return {
-            "class": self.class_name,
+            "class": self.class_number,
             "rollNumber": self.roll_number,
             "name": self.name,
             "parentName": self.parentName,
@@ -297,7 +297,7 @@ def get_AllStudentData():
 
         # Random student data
         student = Student(
-            class_name=str(random.randint(6, 10)),
+            class_number=str(random.randint(6, 10)),
             roll_number=str(random.randint(1, 50)),
             name=random.choice(names),
             password=pass_word,
@@ -381,7 +381,7 @@ def get_LoginStudentData():
             feesHistory.append(fee)
     # Create random student object
     student = Student(
-        class_name=Class,
+        class_number=Class,
         roll_number=roll,
         name=random.choice(names),
         password=pass_word,
@@ -436,7 +436,7 @@ def getAdmin_LoginStudentData():
 
     # Create random student object
     student = Student(
-        class_name=Class,
+        class_number=Class,
         roll_number=roll,
         name=random.choice(names),
         password=pass_word,
