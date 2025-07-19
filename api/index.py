@@ -128,8 +128,8 @@ class PaymentProceess_RESULT:
             "paidFees_Record": [fee.to_dict() for fee in self.paidFees_Record]
         }
 
-@app.route("/payAdmin_StudentPay", methods=["POST", "OPTIONS"])
-def return_StudentPay_Complete():
+@app.route("/removeCustomeFees", methods=["POST", "OPTIONS"])
+def removeCustomeFees():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
@@ -182,8 +182,8 @@ def payAdmin_StudentPay():
             "status": "error",
             "error": str(e)
         }), 500
-@app.route("/payStudentPay", methods=["POST", "OPTIONS"])
-def payStudentPay():
+@app.route("/payStudentFees", methods=["POST", "OPTIONS"])
+def payStudentFees():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
