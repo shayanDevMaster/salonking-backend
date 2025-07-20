@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import pytz
 import re
 import os
+import calendar
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -428,6 +429,7 @@ def get_LoginStudentData():
         days_late = random.randint(0, 30)
         is_paid = random.choices([True, False], weights=[80, 20])[0]
 
+        pay_date = None
         if is_paid:
             pay_date = due_date + timedelta(days=random.randint(2, days_late))
         else:
