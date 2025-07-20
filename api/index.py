@@ -435,7 +435,7 @@ def get_LoginStudentData():
 
         feesHistory.append(FeeHistory(
             record_Id=str(random.randint(10000, 99999)),
-            class_number=student_class,
+            class_number=Class,
             dueDate=due_date.strftime("%Y-%m-%d"),
             payDate=pay_date.strftime("%Y-%m-%d") if pay_date else "",
             purpose=calendar.month_name[month_index] + " Fee",
