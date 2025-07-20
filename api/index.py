@@ -278,9 +278,9 @@ def get_DetailedMonthlyIncome():
 
     detailedMonthlyIncome = []
 
-    for _ in range(random.randint(7, 30)):
+    for i in range(random.randint(4, 12)):
         income = DetailedMonthlyIncome(
-            month=random.choice(months),
+            month=months[i],
             totalStudent=random.choice(totalStudent_list),
             feesCollection_pkr=random.choice(feesCollection_pkr_list),
             pendingFees_pkr=random.choice(pendingFees_pkr_list),
@@ -305,11 +305,9 @@ def get_AllMonthlyFees():
     monthlyFeesSetting = []
 
     for i in range(10):
-        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
-        
         fee = MonthlyFeesSetting(
             class_number=str(i),  # ✅ FIXED HERE
-            monthEndDay=due_date,
+            monthEndDay = 10
             amount=random.choice([1500, 2000, 2500 , 1000, 3000, 3500, 4000, 4500, 5000])
         )
         monthlyFeesSetting.append(fee.to_dict())
@@ -324,20 +322,19 @@ def get_CustomeFees():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
-    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", 
-                "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    purposes = ["Lab Fees", "Sports Fees", "Library Fees", "Exam Fees", "Activity Fees",]
     
     customeFeeRecords = []
 
-    for i in range(random.randint(7, 30)):
+    for i in range(random.randint(1, 10)):
         due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
         
         fee = CustomeFeeRecords(
             record_Id=str(random.randint(100, 1000)),
-            class_number=str(random.randint(1, 10)),  # ✅ FIXED HERE
+            class_number=str(i),  # ✅ FIXED HERE
             dueDate=due_date,
             purpose=random.choice(purposes),
-            amount=random.choice([1500, 2000, 2500])
+            amount=random.choice([1500, 2000, 2500 , 1000, 3000, 3500, 4000, 4500, 5000])
         )
         customeFeeRecords.append(fee.to_dict())
 
@@ -356,26 +353,48 @@ def get_AllStudentData():
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
-    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     pass_word = "qww"
     students = []
     for s in range(random.randint(200, 300)):
 
-        # Random fee history for each student
+
         feesHistory = []
-        for i in range(random.randint(10, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(30, 90))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(5, 29))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        purposes = [
+            "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
+            "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee",
+            "Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"
+        ]
+        # Class mostly between 5–10
+        student_class = str(random.choices(
+            population=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+            weights=[2, 3, 5, 7, 15, 20, 22, 25, 25, 20, 6], k=1)[0])
+
+        # Random months this student paid or due
+        num_entries = random.randint(8, 14)
+        months_sampled = random.sample(purposes[:12], num_entries)
+        optional_fees = random.choices(purposes[12:], k=random.randint(0, 2))
+
+        for purpose in months_sampled + optional_fees:
+            base_days_ago = random.randint(30, 200)
+            due_date = datetime.today() - timedelta(days=base_days_ago)
+
+            is_paid = random.choice([True, False, True])  # Mostly paid
+            if is_paid:
+                # Paid within 5–20 days after due
+                pay_date = due_date + timedelta(days=random.randint(5, 20))
+            else:
+                pay_date = None
+
             fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.randint(1, 11)),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
+                record_Id=str(random.randint(10000, 99999)),
+                class_number=student_class,
+                dueDate=due_date.strftime("%Y-%m-%d"),
+                payDate=pay_date.strftime("%Y-%m-%d") if pay_date else None,
+                purpose=purpose,
+                amount=random.choice([1500, 1800, 2000, 2500, 3000]),
+                status="Paid" if is_paid else "Unpaid"
             )
-            feesHistory.append(fee)
+            feesHistory.append(fee.to_dict())
 
         # Random student data
         student = Student(
@@ -417,50 +436,44 @@ def get_LoginStudentData():
     status_list = ["Paid", "Unpaid"]
     pass_word = "1234567"
     
-    # Generate random fee history (2–3 records)
     feesHistory = []
-    if(roll == "0"):
-        for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(30 , 100))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(20 , 50))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-            fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.choice([5])),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
-            )
-            feesHistory.append(fee)
-    elif(roll == "1"):
-        for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(300, 400))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(290, 390))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-            fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.choice([6,6,6,4,4,6,6,6])),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
-            )
-            feesHistory.append(fee)
-    else:
-        for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(10, 400))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(5, 300))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-            fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
-            )
-            feesHistory.append(fee)
+    purposes = [
+        "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
+        "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee",
+        "Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"
+    ]
+    # Class mostly between 5–10
+    student_class = str(random.choices(
+        population=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+        weights=[2, 3, 5, 7, 15, 20, 22, 25, 25, 20, 6], k=1)[0])
+
+    # Random months this student paid or due
+    num_entries = random.randint(8, 14)
+    months_sampled = random.sample(purposes[:12], num_entries)
+    optional_fees = random.choices(purposes[12:], k=random.randint(0, 2))
+
+    for purpose in months_sampled + optional_fees:
+        base_days_ago = random.randint(30, 200)
+        due_date = datetime.today() - timedelta(days=base_days_ago)
+
+        is_paid = random.choice([True, False, True])  # Mostly paid
+        if is_paid:
+            # Paid within 5–20 days after due
+            pay_date = due_date + timedelta(days=random.randint(5, 20))
+        else:
+            pay_date = None
+
+        fee = FeeHistory(
+            record_Id=str(random.randint(10000, 99999)),
+            class_number=student_class,
+            dueDate=due_date.strftime("%Y-%m-%d"),
+            payDate=pay_date.strftime("%Y-%m-%d") if pay_date else None,
+            purpose=purpose,
+            amount=random.choice([1500, 1800, 2000, 2500, 3000]),
+            status="Paid" if is_paid else "Unpaid"
+        )
+        feesHistory.append(fee.to_dict())
+        
     # Create random student object
     student = Student(
         class_number=Class,
@@ -502,19 +515,42 @@ def getAdmin_LoginStudentData():
     
     # Generate random fee history (2–3 records)
     feesHistory = []
-    for i in range(random.randint(7, 30)):
-        due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
-        pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+    purposes = [
+        "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
+        "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee",
+        "Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"
+    ]
+    # Class mostly between 5–10
+    student_class = str(random.choices(
+        population=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+        weights=[2, 3, 5, 7, 15, 20, 22, 25, 25, 20, 6], k=1)[0])
+
+    # Random months this student paid or due
+    num_entries = random.randint(8, 14)
+    months_sampled = random.sample(purposes[:12], num_entries)
+    optional_fees = random.choices(purposes[12:], k=random.randint(0, 2))
+
+    for purpose in months_sampled + optional_fees:
+        base_days_ago = random.randint(30, 200)
+        due_date = datetime.today() - timedelta(days=base_days_ago)
+
+        is_paid = random.choice([True, False, True])  # Mostly paid
+        if is_paid:
+            # Paid within 5–20 days after due
+            pay_date = due_date + timedelta(days=random.randint(5, 20))
+        else:
+            pay_date = None
+
         fee = FeeHistory(
-            record_Id=str(random.randint(100, 1000)),
-            class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
-            dueDate=due_date,
-            payDate=pay_date,
-            purpose=random.choice(purposes),
-            amount=random.choice([1500, 2000, 2500]),
-            status="Paid" if pay_date else "Unpaid"
+            record_Id=str(random.randint(10000, 99999)),
+            class_number=student_class,
+            dueDate=due_date.strftime("%Y-%m-%d"),
+            payDate=pay_date.strftime("%Y-%m-%d") if pay_date else None,
+            purpose=purpose,
+            amount=random.choice([1500, 1800, 2000, 2500, 3000]),
+            status="Paid" if is_paid else "Unpaid"
         )
-        feesHistory.append(fee)
+        feesHistory.append(fee.to_dict())
 
     # Create random student object
     student = Student(
