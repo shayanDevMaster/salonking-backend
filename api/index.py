@@ -400,58 +400,75 @@ def get_AllStudentData():
 @app.route("/get_LoginStudentData", methods=["POST", "OPTIONS"])
 def get_LoginStudentData():
     if request.method == "OPTIONS":
-        return jsonify({}), 204
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
 
     data = request.get_json()
+    
     Class = data.get("class")
     roll = data.get("rollNumber")
     password = data.get("password")
 
+    # Random mock data
     names = ["Aliyaan Shahid", "Ahmed Raza", "Fatima Noor", "Sara Ahmed"]
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     status_list = ["Paid", "Unpaid"]
-
-    # Generate fees
+    pass_word = "1234567"
+    
+    # Create fee history based on realistic pattern
     feesHistory = []
-    purposes = [
-        "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
-        "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee",
-        "Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"
-    ]
+    today = datetime.today()
 
-    student_class = str(random.choices(
-        population=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
-        weights=[2, 3, 5, 7, 15, 20, 22, 25, 25, 20, 6], k=1)[0])
+    # Generate monthly fees from Jan to current month
+    current_month = today.month
+    for month_index in range(1, current_month + 1):
+        due_date = datetime(today.year, month_index, 10)
+        days_late = random.randint(0, 30)
+        is_paid = random.choices([True, False], weights=[80, 20])[0]
 
-    num_entries = random.randint(8, 14)
-    months_sampled = random.sample(purposes[:12], num_entries)
-    optional_fees = random.choices(purposes[12:], k=random.randint(0, 2))
+        if is_paid:
+            pay_date = due_date + timedelta(days=random.randint(2, days_late))
+        else:
+            pay_date = None
 
-    for purpose in months_sampled + optional_fees:
-        base_days_ago = random.randint(30, 200)
-        due_date = datetime.today() - timedelta(days=base_days_ago)
-
-        is_paid = random.choice([True, False, True])
-        pay_date = due_date + timedelta(days=random.randint(5, 20)) if is_paid else None
-
-        fee = FeeHistory(
+        feesHistory.append(FeeHistory(
             record_Id=str(random.randint(10000, 99999)),
             class_number=student_class,
             dueDate=due_date.strftime("%Y-%m-%d"),
-            payDate=pay_date.strftime("%Y-%m-%d") if pay_date else None,
-            purpose=purpose,
-            amount=random.choice([1500, 1800, 2000, 2500, 3000]),
+            payDate=pay_date.strftime("%Y-%m-%d") if pay_date else "",
+            purpose=calendar.month_name[month_index] + " Fee",
+            amount=random.choice([1500, 1800, 2000, 2500]),
             status="Paid" if is_paid else "Unpaid"
-        )
-        feesHistory.append(fee)  # ✅ append object
+        ).to_dict())
 
+    # Add some optional fees (Exams, Admission, Computer Lab)
+    optional_fees = ["Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"]
+    for purpose in random.sample(optional_fees, random.randint(1, 2)):
+        due_date = today - timedelta(days=random.randint(40, 90))
+        is_paid = random.choices([True, False], weights=[70, 30])[0]
+        if is_paid:
+            pay_date = due_date + timedelta(days=random.randint(2, 20))
+        else:
+            pay_date = None
+
+        feesHistory.append(FeeHistory(
+            record_Id=str(random.randint(10000, 99999)),
+            class_number=student_class,
+            dueDate=due_date.strftime("%Y-%m-%d"),
+            payDate=pay_date.strftime("%Y-%m-%d") if pay_date else "",
+            purpose=purpose,
+            amount=random.choice([1000, 1200, 1500, 2000]),
+            status="Paid" if is_paid else "Unpaid"
+        ).to_dict())
+
+    # Create random student object
     student = Student(
         class_number=Class,
         roll_number=roll,
         name=random.choice(names),
-        password=actual_password,
+        password=pass_word,
         parentName=random.choice(parents),
         address=random.choice(addresses),
         contactNumber=random.choice(contacts),
@@ -462,7 +479,6 @@ def get_LoginStudentData():
         "status": "success",
         "data": student.to_dict()
     })
-
 
 
 
