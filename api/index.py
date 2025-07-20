@@ -421,8 +421,9 @@ def get_LoginStudentData():
     feesHistory = []
     if(roll == "0"):
         for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(30 , 100))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(20 , 50))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+            delayDays = random.randint(10, 30)
+            due_date = (datetime.today() - timedelta(days=delayDays)).strftime("%Y-%m-%d")
+            pay_date = (datetime.today() - timedelta(days=(delayDays + random.randint(-10 , 30)))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
                 record_Id=str(random.randint(100, 1000)),
                 class_number=str(random.choice([5])),
@@ -435,8 +436,9 @@ def get_LoginStudentData():
             feesHistory.append(fee)
     elif(roll == "1"):
         for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(300, 400))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(290, 390))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+            delayDays = random.randint(250, 400)
+            due_date = (datetime.today() - timedelta(days=delayDays)).strftime("%Y-%m-%d")
+            pay_date = (datetime.today() - timedelta(days=(delayDays + random.randint(-10 , 30)))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
                 record_Id=str(random.randint(100, 1000)),
                 class_number=str(random.choice([6,6,6,4,4,6,6,6])),
@@ -449,8 +451,9 @@ def get_LoginStudentData():
             feesHistory.append(fee)
     else:
         for i in range(random.randint(7, 30)):
-            due_date = (datetime.today() - timedelta(days=random.randint(10, 400))).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=random.randint(5, 300))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+            delayDays = random.randint(10, 400)
+            due_date = (datetime.today() - timedelta(days=delayDays)).strftime("%Y-%m-%d")
+            pay_date = (datetime.today() - timedelta(days=(delayDays + random.randint(-10 , 30)))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
             fee = FeeHistory(
                 record_Id=str(random.randint(100, 1000)),
                 class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
