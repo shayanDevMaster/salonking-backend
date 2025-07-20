@@ -432,22 +432,22 @@ def get_LoginStudentData():
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
-    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     status_list = ["Paid", "Unpaid"]
     pass_word = "1234567"
     
+    
+    # Generate fees
     feesHistory = []
     purposes = [
         "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
         "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee",
         "Exam Fee", "Admission Fee", "Computer Lab Fee", "Library Fee"
     ]
-    # Class mostly between 5–10
+
     student_class = str(random.choices(
         population=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
         weights=[2, 3, 5, 7, 15, 20, 22, 25, 25, 20, 6], k=1)[0])
 
-    # Random months this student paid or due
     num_entries = random.randint(8, 14)
     months_sampled = random.sample(purposes[:12], num_entries)
     optional_fees = random.choices(purposes[12:], k=random.randint(0, 2))
@@ -456,12 +456,8 @@ def get_LoginStudentData():
         base_days_ago = random.randint(30, 200)
         due_date = datetime.today() - timedelta(days=base_days_ago)
 
-        is_paid = random.choice([True, False, True])  # Mostly paid
-        if is_paid:
-            # Paid within 5–20 days after due
-            pay_date = due_date + timedelta(days=random.randint(5, 20))
-        else:
-            pay_date = None
+        is_paid = random.choice([True, False, True])
+        pay_date = due_date + timedelta(days=random.randint(5, 20)) if is_paid else None
 
         fee = FeeHistory(
             record_Id=str(random.randint(10000, 99999)),
@@ -472,7 +468,7 @@ def get_LoginStudentData():
             amount=random.choice([1500, 1800, 2000, 2500, 3000]),
             status="Paid" if is_paid else "Unpaid"
         )
-        feesHistory.append(fee.to_dict())
+        feesHistory.append(fee)  # ✅ append object
         
     # Create random student object
     student = Student(
