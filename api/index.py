@@ -439,7 +439,7 @@ def get_LoginStudentData():
         month_limit = datetime.today().month if rc == 0 else 12
         paid_months = random.randint(0, month_limit)
         for m in range(month_limit):
-            isPaid = (rc == 0 and paid_months <= m) or (rc > 0)
+            isPaid = (rc == 0 and paid_months >= m) or (rc > 0)
             pur = m
             delayDays = ((pur + 1) * 30) + 10
             due_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays)).strftime("%Y-%m-%d")
