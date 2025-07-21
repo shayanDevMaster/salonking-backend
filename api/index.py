@@ -435,15 +435,15 @@ def get_LoginStudentData():
     
     rc = 0
     for c in reversed(range(1, int(Class) + 1)):
-        month = datetime.today().month
-        if(rc > 0):
-            month = 12
 
-        for m in range(month):
+        month_limit = datetime.today().month if rc == 0 else 12
+
+        for m in range(month_limit):
+            isPaid = (rc == 0 and random.choice([True, False])) or (rc > 0)
             pur = m
             delayDays = ((pur + 1) * 30) + 10
             due_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays)).strftime("%Y-%m-%d")
-            pay_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays + random.randint(-10 , 20))).strftime("%Y-%m-%d") if rc == 0 and random.choice([True, False]) else None
+            pay_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays + random.randint(-10 , 20))).strftime("%Y-%m-%d") if isPaid else None
             fee = FeeHistory(
                 record_Id=str(random.randint(100, 1000)),
                 class_number=str(c),
