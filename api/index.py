@@ -421,7 +421,7 @@ def get_LoginStudentData():
     feesHistory = []
     if(roll == "0"):
         for i in range(random.randint(7, 30)):
-            pur = random.randint(0, purpose.__len__() - 1)
+            pur = random.randint(0, len(purpose) - 1)
             delayDays = (pur * 30) + 10
             due_date = (datetime(datetime.today().year, 1, 1) + timedelta(days=delayDays)).strftime("%Y-%m-%d")
             pay_date = (datetime(datetime.today().year, 1, 1) + timedelta(days=delayDays + random.randint(-10 , 20))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
