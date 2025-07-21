@@ -361,6 +361,7 @@ def get_AllStudentData():
 
         # Random fee history for each student
         feesHistory = []
+        Class = random.randint(1, 10)
         rc = 0
         for c in reversed(range(1, int(Class) + 1)):
 
