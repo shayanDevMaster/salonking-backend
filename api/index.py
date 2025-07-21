@@ -305,11 +305,9 @@ def get_AllMonthlyFees():
     monthlyFeesSetting = []
 
     for i in range(10):
-        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
-        
         fee = MonthlyFeesSetting(
-            class_number=str(i),  # ✅ FIXED HERE
-            monthEndDay=due_date,
+            class_number=str(i+1),  # ✅ FIXED HERE
+            monthEndDay="10",
             amount=random.choice([1500, 2000, 2500 , 1000, 3000, 3500, 4000, 4500, 5000])
         )
         monthlyFeesSetting.append(fee.to_dict())
