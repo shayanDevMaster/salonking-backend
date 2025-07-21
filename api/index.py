@@ -433,21 +433,28 @@ def get_LoginStudentData():
     feesHistory = []
     purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     
-    for i in range(random.randint(7, 30)):
-        pur = random.randint(0, len(purposes) - 1)
-        delayDays = ((pur + 1) * 30) + 10
-        due_date = (datetime(datetime.today().year, 1, 1) + timedelta(days=delayDays)).strftime("%Y-%m-%d")
-        pay_date = (datetime(datetime.today().year, 1, 1) + timedelta(days=delayDays + random.randint(-10 , 20))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-        fee = FeeHistory(
-            record_Id=str(random.randint(100, 1000)),
-            class_number=str(random.choice([5])),
-            dueDate=due_date,
-            payDate=pay_date,
-            purpose=purposes[pur],
-            amount=random.choice([1500, 2000, 2500]),
-            status="Paid" if pay_date else "Unpaid"
-        )
-        feesHistory.append(fee)
+    rc = 0
+    for c in reversed(range(1, int(Class) + 1)):
+        month = datetime.today().month
+        if(rc > 0):
+            month = 12
+
+        for m in range(month):
+            pur = m
+            delayDays = ((pur + 1) * 30) + 10
+            due_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays)).strftime("%Y-%m-%d")
+            pay_date = (datetime(datetime.today().year - rc , 1, 1) + timedelta(days=delayDays + random.randint(-10 , 20))).strftime("%Y-%m-%d") if rc == 0 and random.choice([True, False]) else None
+            fee = FeeHistory(
+                record_Id=str(random.randint(100, 1000)),
+                class_number=str(c),
+                dueDate=due_date,
+                payDate=pay_date,
+                purpose=purposes[pur],
+                amount=random.choice([1500, 2000, 2500]),
+                status="Paid" if pay_date else "Unpaid"
+            )
+            feesHistory.append(fee)
+        rc += 1
     
     # Create random student object
     student = Student(
