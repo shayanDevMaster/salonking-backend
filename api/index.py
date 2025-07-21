@@ -400,7 +400,7 @@ def get_AllStudentData():
 @app.route("/get_LoginStudentData", methods=["POST", "OPTIONS"])
 def get_LoginStudentData():
     if request.method == "OPTIONS":
-        return jsonify({}), 204
+        return jsonify({}), 204  # Respond to preflight with 204 No Content
 
     data = request.get_json()
     
@@ -408,50 +408,31 @@ def get_LoginStudentData():
     roll = data.get("rollNumber")
     password = data.get("password")
 
+    # Random mock data
     names = ["Aliyaan Shahid", "Ahmed Raza", "Fatima Noor", "Sara Ahmed"]
     parents = ["Shahid Khan", "Raza Ali", "Umer Farooq", "Kashif Mehmood"]
     addresses = ["Lahore", "Karachi", "Islamabad", "Faisalabad"]
     contacts = ["03001234567", "03111234567", "03211234567", "03331234567"]
-    purposes = [
-        "Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee",
-        "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"
-    ]
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    status_list = ["Paid", "Unpaid"]
     pass_word = "1234567"
     
     feesHistory = []
-    
-    if roll == "1":
-        for i in range(random.randint(7, 30)):
-            delayDays = random.randint(250, 400)
-            due_date = (datetime.today() - timedelta(days=delayDays)).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=delayDays + random.randint(-10, 30))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-            fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.choice([6, 6, 6, 4, 4, 6, 6, 6])),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
-            )
-            feesHistory.append(fee.to_dict())
-
-    else:
-        for i in range(random.randint(7, 30)):
-            delayDays = random.randint(10, 400)
-            due_date = (datetime.today() - timedelta(days=delayDays)).strftime("%Y-%m-%d")
-            pay_date = (datetime.today() - timedelta(days=delayDays + random.randint(-10, 30))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
-            fee = FeeHistory(
-                record_Id=str(random.randint(100, 1000)),
-                class_number=str(random.choice([1]*4 + [2]*5 + [4]*4 + [5]*5 + [6]*4)),
-                dueDate=due_date,
-                payDate=pay_date,
-                purpose=random.choice(purposes),
-                amount=random.choice([1500, 2000, 2500]),
-                status="Paid" if pay_date else "Unpaid"
-            )
-            feesHistory.append(fee.to_dict())
-
+    for i in range(random.randint(7, 30)):
+        due_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d")
+        pay_date = (datetime.today() - timedelta(days=random.randint(250, 500))).strftime("%Y-%m-%d") if random.choice([True, False]) else None
+        fee = FeeHistory(
+            record_Id=str(random.randint(100, 1000)),
+            class_number=str(random.choice([1,1,1,1,2,2,2,2,2,4,4,4,4,5,5,5,5,5,6,6,6,6])),
+            dueDate=due_date,
+            payDate=pay_date,
+            purpose=random.choice(purposes),
+            amount=random.choice([1500, 2000, 2500]),
+            status="Paid" if pay_date else "Unpaid"
+        )
+        feesHistory.append(fee)
+        
+    # Create random student object
     student = Student(
         class_number=Class,
         roll_number=roll,
@@ -467,7 +448,6 @@ def get_LoginStudentData():
         "status": "success",
         "data": student.to_dict()
     })
-
 
 
 
