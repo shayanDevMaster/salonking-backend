@@ -363,7 +363,10 @@ def get_AllStudentData():
         feesHistory = []
         Class = random.randint(1, 10)
         rc = 0
-        for c in reversed(range(1, int(Class) + 1)):
+        loop_class = int(Class)
+        if loop_class == 0:
+            loop_class = 1
+        for c in reversed(range(1, int(loop_class) + 1)):
 
             month_limit = datetime.today().month if rc == 0 else 12
             paid_months = random.randint(0, month_limit)
@@ -442,7 +445,10 @@ def get_LoginStudentData():
     purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     
     rc = 0
-    for c in reversed(range(1, int(Class) + 1)):
+    loop_class = int(Class)
+    if loop_class == 0:
+        loop_class = 1
+    for c in reversed(range(1, int(loop_class) + 1)):
 
         month_limit = datetime.today().month if rc == 0 else 12
         paid_months = random.randint(0, month_limit)
@@ -555,7 +561,11 @@ def getAdmin_LoginStudentData():
     # Generate random fee history (2–3 records)
     feesHistory = []
     rc = 0
-    for c in reversed(range(1, int(Class) + 1)):
+    # If Class is 0, treat as 1 for the loop
+    loop_class = int(Class)
+    if loop_class == 0:
+        loop_class = 1
+    for c in reversed(range(1, int(loop_class) + 1)):
 
         month_limit = datetime.today().month if rc == 0 else 12
         paid_months = random.randint(0, month_limit)
