@@ -297,7 +297,6 @@ def get_DetailedMonthlyIncome():
             detailedMonthlyIncome.append(income.to_dict())
         rc += 1
 
-    for m in range(random.randint(7, 30)):
 
     return jsonify({
         "status": "success",
@@ -338,7 +337,7 @@ def get_CustomeFees():
     customeFeeRecords = []
 
     for i in range(random.randint(0, 3)):
-        due_date = (datetime.today() + timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
+        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
         
         fee = CustomeFeeRecords(-
             record_Id=str(random.randint(100, 1000)),
