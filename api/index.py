@@ -282,7 +282,7 @@ def get_DetailedMonthlyIncome():
     purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
     
     rc = 0
-    for c in reversed(random.randint(7, 30)):
+    for c in reversed(range(random.randint(7, 30))):
 
         month_limit = datetime.today().month if rc == 0 else 12
         for m in range(month_limit):
@@ -339,7 +339,7 @@ def get_CustomeFees():
     for i in range(random.randint(0, 3)):
         due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
         
-        fee = CustomeFeeRecords(-
+        fee = CustomeFeeRecords(
             record_Id=str(random.randint(100, 1000)),
             class_number=str(random.randint(1, 10)),  # ✅ FIXED HERE
             dueDate=due_date,
