@@ -366,7 +366,9 @@ def get_AllStudentData():
         loop_class = int(Class)
         if loop_class == 0:
             loop_class = 1
-        for c in reversed(range(0, int(loop_class) + 1)):
+        else:
+            loop_class += 1
+        for c in reversed(range(0, int(loop_class))):
 
             month_limit = datetime.today().month if rc == 0 else 12
             paid_months = random.randint(0, month_limit)
@@ -448,7 +450,9 @@ def get_LoginStudentData():
     loop_class = int(Class)
     if loop_class == 0:
         loop_class = 1
-    for c in reversed(range(0, int(loop_class) + 1)):
+    else:
+        loop_class += 1
+    for c in reversed(range(0, int(loop_class))):
 
         month_limit = datetime.today().month if rc == 0 else 12
         paid_months = random.randint(0, month_limit)
@@ -565,7 +569,9 @@ def getAdmin_LoginStudentData():
     loop_class = int(Class)
     if loop_class == 0:
         loop_class = 1
-    for c in reversed(range(0, int(loop_class) + 1)):
+    else:
+        loop_class += 1
+    for c in reversed(range(0, int(loop_class))):
 
         month_limit = datetime.today().month if rc == 0 else 12
         paid_months = random.randint(0, month_limit)
