@@ -270,38 +270,40 @@ def get_DetailedMonthlyIncome():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
-    totalStudent_list = [200, 200 , 190, 200, 200]
-    collectionRate_list = [100, 90, 12, 32, 32]
-    pendingFees_pkr_list = [1200, 3100, 4500, 1000, 900]
-    feesCollection_pkr_list = [8000, 9000, 4000, 2000, 2500]
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November"]
+    import math
+
+    months = ["January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"]
 
     detailedMonthlyIncome = []
 
-    feesHistory = []
-    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
-    
-    rc = 0
-    for c in reversed(range(random.randint(7, 30))):
+    base_students = random.randint(180, 220)
+    base_amount_per_student = random.choice([1500, 2000, 2500])
 
-        month_limit = datetime.today().month if rc == 0 else 12
-        for m in range(month_limit):
-            income = DetailedMonthlyIncome(
-                month=months[m],
-                totalStudent=random.choice(totalStudent_list),
-                feesCollection_pkr=random.choice(feesCollection_pkr_list),
-                pendingFees_pkr=random.choice(pendingFees_pkr_list),
-                collectionRate=random.choice(collectionRate_list)
-            )
+    for i in range(datetime.today().month):  # Only generate up to current month
+        total_students = base_students + random.randint(-5, 5)
 
-            detailedMonthlyIncome.append(income.to_dict())
-        rc += 1
+        # Simulate a realistic collection rate (e.g., increases over months)
+        collection_rate = min(100, max(60, int(50 + i * random.uniform(2.0, 4.5))))  # starts from ~50%, improves
+        total_possible = total_students * base_amount_per_student
+        fees_collected = int(total_possible * (collection_rate / 100.0))
+        pending_fees = total_possible - fees_collected
 
+        income = DetailedMonthlyIncome(
+            month=months[i],
+            totalStudent=total_students,
+            feesCollection_pkr=fees_collected,
+            pendingFees_pkr=pending_fees,
+            collectionRate=collection_rate
+        )
+
+        detailedMonthlyIncome.append(income.to_dict())
 
     return jsonify({
         "status": "success",
         "data": detailedMonthlyIncome
     })
+
 
 @app.route("/get_AllMonthlyFees", methods=["POST", "OPTIONS"])
 def get_AllMonthlyFees():
