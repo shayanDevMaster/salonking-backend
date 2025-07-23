@@ -270,7 +270,7 @@ def get_DetailedMonthlyIncome():
     if request.method == "OPTIONS":
         return jsonify({}), 204
 
-    totalStudent_list = [1001, 10021, 13001, 10014, 10501]
+    totalStudent_list = [200, 200 , 190, 200, 200]
     collectionRate_list = [100, 90, 12, 32, 32]
     pendingFees_pkr_list = [1200, 3100, 4500, 1000, 900]
     feesCollection_pkr_list = [8000, 9000, 4000, 2000, 2500]
@@ -278,16 +278,26 @@ def get_DetailedMonthlyIncome():
 
     detailedMonthlyIncome = []
 
-    for _ in range(random.randint(7, 30)):
-        income = DetailedMonthlyIncome(
-            month=random.choice(months),
-            totalStudent=random.choice(totalStudent_list),
-            feesCollection_pkr=random.choice(feesCollection_pkr_list),
-            pendingFees_pkr=random.choice(pendingFees_pkr_list),
-            collectionRate=random.choice(collectionRate_list)
-        )
+    feesHistory = []
+    purposes = ["Jan Fee", "Feb Fee", "Mar Fee", "Apr Fee", "May Fee", "Jun Fee", "Jul Fee", "Aug Fee", "Sep Fee", "Oct Fee", "Nov Fee", "Dec Fee"]
+    
+    rc = 0
+    for c in reversed(random.randint(7, 30)):
 
-        detailedMonthlyIncome.append(income.to_dict())
+        month_limit = datetime.today().month if rc == 0 else 12
+        for m in range(month_limit):
+            income = DetailedMonthlyIncome(
+                month=months[m],
+                totalStudent=random.choice(totalStudent_list),
+                feesCollection_pkr=random.choice(feesCollection_pkr_list),
+                pendingFees_pkr=random.choice(pendingFees_pkr_list),
+                collectionRate=random.choice(collectionRate_list)
+            )
+
+            detailedMonthlyIncome.append(income.to_dict())
+        rc += 1
+
+    for m in range(random.randint(7, 30)):
 
     return jsonify({
         "status": "success",
@@ -327,10 +337,10 @@ def get_CustomeFees():
     
     customeFeeRecords = []
 
-    for i in range(random.randint(7, 30)):
-        due_date = (datetime.today() - timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
+    for i in range(random.randint(0, 3)):
+        due_date = (datetime.today() + timedelta(days=random.randint(30, 100))).strftime("%Y-%m-%d")
         
-        fee = CustomeFeeRecords(
+        fee = CustomeFeeRecords(-
             record_Id=str(random.randint(100, 1000)),
             class_number=str(random.randint(1, 10)),  # ✅ FIXED HERE
             dueDate=due_date,
