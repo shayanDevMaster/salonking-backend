@@ -372,7 +372,7 @@ def get_AllStudentData():
 
         # Random fee history for each student
         feesHistory = []
-        Class = random.randint(1, 10)
+        Class = random.randint(0, 10)
         rc = 0
         loop_class = int(Class)
         if loop_class == 0:
@@ -403,7 +403,7 @@ def get_AllStudentData():
 
         # Random student data
         student = Student(
-            class_number=str(random.randint(6, 10)),
+            class_number=str(Class),
             roll_number=str(random.randint(1, 50)),
             name=random.choice(names),
             password=pass_word,
